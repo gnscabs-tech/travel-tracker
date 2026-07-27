@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Travel Tracker</title>
-<meta name="app-build" content="20260728-2">
+<meta name="app-build" content="20260728-3">
 <meta name="theme-color" content="#1E3A8A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -956,6 +956,13 @@ function renderHome(){
 function entryRowHTML(id, e){
   const v = vehicles[e.vehicleId] || {name:'—',number:''};
   const d = drivers[e.driverId] || {name:'—'};
+  const expenseItemsHTML = (e.expenseItems && e.expenseItems.length) ? `
+    <div style="font-size:12.5px;color:var(--muted);margin-top:6px;padding-top:6px;border-top:1px dashed var(--border);">
+      ${e.expenseItems.map(item=>{
+        const catName = (expenseCategories[item.categoryId] && expenseCategories[item.categoryId].name) || 'Expense';
+        return `${catName}: ${fmt(item.amount)}`;
+      }).join(' &nbsp;·&nbsp; ')}
+    </div>` : '';
   return `<div class="entry-row">
     <div class="er-top">
       <div><div class="er-date">${e.date}</div><div class="er-vehicle">${v.name} · ${v.number} · ${d.name}</div></div>
@@ -967,6 +974,7 @@ function entryRowHTML(id, e){
       <div><span class="lbl">Fuel:</span> ${fmt(e.fuelAmount)}</div>
       <div><span class="lbl">Commission:</span> ${fmt(e.commissionAmt)}</div>
     </div>
+    ${expenseItemsHTML}
     <div class="er-actions">
       <button class="edt" onclick="editEntry('${id}')">Edit</button>
       <button class="del" onclick="deleteEntry('${id}')">Delete</button>
