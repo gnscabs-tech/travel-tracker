@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Travel Tracker</title>
+<meta name="app-build" content="20260727-1">
+<meta name="theme-color" content="#1E3A8A">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============ CONFIG SECTION - Change per customer ============ */
+:root{
+  --company-name: "GNS CABS";
+  --primary: #1E3A8A;
+  --primary-light: #2E4FB5;
+  --accent: #FF9F1C;
+  --success: #06A77D;
+  --danger: #E63946;
+  --bg: #F7F9FC;
+  --surface: #FFFFFF;
+  --text: #1A1D29;
+  --muted: #6B7280;
+  --border: #E5E9F0;
+}
+/* ================================================================ */
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;}
+h1,h2,h3,.heading{font-family:'Poppins',sans-serif;}
+#app{max-width:600px;margin:0 auto;min-height:100vh;padding-bottom:80px;}
+
+header{
+  background:linear-gradient(135deg,var(--primary),var(--primary-light));
+  color:#fff;padding:20px 18px 16px;position:sticky;top:0;z-index:20;
+  box-shadow:0 4px 14px rgba(30,58,138,0.25);
+}
+header .top-row{display:flex;justify-content:space-between;align-items:center;}
+header h1{font-size:19px;margin:0;font-weight:700;letter-spacing:0.3px;}
+header .sub{font-size:12px;opacity:0.85;margin-top:2px;}
+header button.icon-btn{background:rgba(255,255,255,0.15);border:none;color:#fff;width:38px;height:38px;border-radius:10px;font-size:16px;}
+
+nav.tabs{
+  display:flex;background:var(--surface);border-bottom:1px solid var(--border);
+  position:sticky;top:70px;z-index:19;overflow-x:auto;
+}
+nav.tabs button{
+  flex:1;min-width:80px;padding:13px 8px;background:none;border:none;font-size:12.5px;font-weight:600;
+  color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap;font-family:'Inter';
+}
+nav.tabs button.active{color:var(--primary);border-bottom-color:var(--accent);}
+
+main{padding:16px;}
+.hidden{display:none !important;}
+
+/* Cards */
+.card{background:var(--surface);border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,0.04);border:1px solid var(--border);}
+.card-title{font-size:15px;font-weight:700;margin:0 0 12px;display:flex;justify-content:space-between;align-items:center;}
+
+/* Summary stat grid */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.stat-box{background:var(--surface);border-radius:14px;padding:14px;border:1px solid var(--border);text-align:center;}
+.stat-box .val{font-size:20px;font-weight:800;font-family:'Poppins';}
+.stat-box .lbl{font-size:11px;color:var(--muted);margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;}
+.stat-box.income .val{color:var(--success);}
+.stat-box.expense .val{color:var(--danger);}
+.stat-box.profit .val{color:var(--primary);}
+.stat-box.km .val{color:var(--accent);}
+
+/* Vehicle / Driver chips with full CRUD */
+.chip-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+.chip{
+  background:#EEF2FF;color:var(--primary);border-radius:20px;padding:8px 14px;font-size:13px;font-weight:600;
+  display:flex;align-items:center;gap:8px;border:1px solid #D6DEFF;
+}
+.chip button{background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;padding:0;}
+.chip button.del-x{color:var(--danger);}
+.add-chip-btn{
+  background:none;border:2px dashed var(--border);color:var(--muted);border-radius:20px;padding:8px 16px;
+  font-size:13px;font-weight:600;
+}
+
+/* Entry list rows */
+.entry-row{
+  background:var(--surface);border-radius:14px;padding:14px;margin-bottom:10px;border:1px solid var(--border);
+  border-left:4px solid var(--accent);
+}
+.entry-row .er-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.entry-row .er-date{font-weight:700;font-size:14px;}
+.entry-row .er-vehicle{font-size:12px;color:var(--muted);}
+.entry-row .er-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:13px;margin-bottom:8px;}
+.entry-row .er-grid .lbl{color:var(--muted);}
+.entry-row .er-actions{display:flex;justify-content:flex-end;gap:16px;}
+.entry-row .er-actions button{background:none;border:none;font-size:12px;font-weight:600;cursor:pointer;}
+.entry-row .er-actions .edt{color:var(--primary);}
+.entry-row .er-actions .del{color:var(--danger);}
+
+/* Buttons */
+.btn{padding:13px 18px;border-radius:12px;border:none;font-size:14.5px;font-weight:700;font-family:'Inter';cursor:pointer;}
+.btn.block{width:100%;}
+.btn.primary{background:var(--primary);color:#fff;}
+.btn.accent{background:var(--accent);color:#fff;}
+.btn.ghost{background:none;border:2px solid var(--border);color:var(--muted);}
+.btn.wa{background:#25D366;color:#fff;}
+
+.fab{
+  position:fixed;bottom:22px;right:calc(50% - 300px + 18px);
+  width:58px;height:58px;border-radius:50%;background:var(--accent);color:#fff;border:none;
+  font-size:28px;box-shadow:0 6px 18px rgba(255,159,28,0.4);display:flex;align-items:center;justify-content:center;
+}
+@media (max-width:620px){.fab{right:18px;}}
+
+/* Modal */
+.overlay{position:fixed;inset:0;background:rgba(20,24,40,0.55);display:none;align-items:flex-end;justify-content:center;z-index:100;}
+.overlay.show{display:flex;}
+.sheet{background:var(--surface);width:100%;max-width:600px;border-radius:20px 20px 0 0;padding:22px;max-height:88vh;overflow-y:auto;}
+.sheet h2{font-size:18px;margin:0 0 16px;}
+.fgroup{margin-bottom:14px;}
+.fgroup label{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.3px;display:block;margin-bottom:6px;}
+.fgroup input,.fgroup select,.fgroup textarea{
+  width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14.5px;
+  font-family:'Inter';background:#FAFBFD;color:var(--text);
+}
+.fgroup textarea{resize:vertical;min-height:50px;}
+.frow{display:flex;gap:10px;}
+.frow .fgroup{flex:1;}
+.sheet-actions{display:flex;gap:10px;margin-top:8px;}
+.sheet-actions .btn{flex:1;}
+.payment-toggle{display:flex;gap:8px;margin-bottom:14px;}
+.payment-toggle button{flex:1;padding:11px;border-radius:10px;border:1.5px solid var(--border);background:#FAFBFD;font-size:13px;font-weight:700;color:var(--muted);}
+.payment-toggle button.sel{background:var(--primary);color:#fff;border-color:var(--primary);}
+
+.empty-state{text-align:center;padding:50px 20px;color:var(--muted);}
+.empty-state .ic{font-size:36px;margin-bottom:10px;opacity:0.5;}
+
+.toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%);background:var(--primary);color:#fff;padding:11px 20px;border-radius:24px;font-size:13.5px;font-weight:600;z-index:200;opacity:0;pointer-events:none;transition:opacity .2s;box-shadow:0 4px 14px rgba(0,0,0,0.2);}
+.toast.show{opacity:1;}
+
+#updateBanner{display:none;position:fixed;top:0;left:0;right:0;background:var(--success);color:#fff;text-align:center;padding:8px;font-size:12px;z-index:300;}
+
+.filter-row{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;}
+.filter-row button{
+  padding:8px 16px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface);
+  font-size:12.5px;font-weight:600;color:var(--muted);white-space:nowrap;
+}
+.filter-row button.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+
+.section-label{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin:18px 0 8px;}
+</style>
+</head>
+<body>
+<div id="updateBanner">New version available — reloading…</div>
+
+<div id="lockScreen" class="hidden" style="position:fixed;inset:0;background:linear-gradient(135deg,#1E3A8A,#0F2050);z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;color:#fff;">
+  <div style="font-size:48px;margin-bottom:16px;">🔒</div>
+  <div style="font-size:19px;font-weight:800;font-family:'Poppins';margin-bottom:10px;" id="lockTitle">Subscription Renewal Pending</div>
+  <div style="font-size:14px;opacity:0.85;max-width:340px;line-height:1.6;" id="lockMessage">Your subscription has expired. Please contact support to renew and continue using the app.</div>
+  <button class="btn accent" style="margin-top:24px;" onclick="openAdminLoginModal()">Admin Login</button>
+</div>
+
+<div id="app">
+
+  <header>
+    <div class="top-row">
+      <div>
+        <h1 id="headerCompanyName">GNS CABS</h1>
+        <div class="sub">Travel &amp; Vehicle Tracker</div>
+      </div>
+      <button class="icon-btn" onclick="openAdminLoginModal()" style="margin-right:8px;">🔒</button>
+      <button class="icon-btn" onclick="openConfigModal()">⚙️</button>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabNav">
+    <button class="active" data-tab="home">🏠 Home</button>
+    <button data-tab="entries">📋 Entries</button>
+    <button data-tab="reports">📊 Reports</button>
+    <button data-tab="vehicles">🚗 Vehicles</button>
+    <button data-tab="drivers">👤 Drivers</button>
+  </nav>
+
+  <main>
+
+    <!-- HOME TAB -->
+    <div id="tab-home" class="tab-panel">
+      <div class="stat-grid">
+        <div class="stat-box income"><div class="val" id="homeIncome">₹0</div><div class="lbl">This Month Income</div></div>
+        <div class="stat-box expense"><div class="val" id="homeExpense">₹0</div><div class="lbl">This Month Expense</div></div>
+        <div class="stat-box profit"><div class="val" id="homeProfit">₹0</div><div class="lbl">Net Profit</div></div>
+        <div class="stat-box km"><div class="val" id="homeKM">0</div><div class="lbl">Total KM</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Quick Actions</div>
+        <button class="btn primary block" style="margin-bottom:10px;" onclick="openEntryModal()">+ Add Today's Trip Entry</button>
+        <button class="btn wa block" onclick="shareMonthlyWhatsApp()">📱 Share Monthly Summary (WhatsApp)</button>
+      </div>
+
+      <div class="section-label">Recent Entries</div>
+      <div id="homeRecentEntries"></div>
+    </div>
+
+    <!-- ENTRIES TAB -->
+    <div id="tab-entries" class="tab-panel hidden">
+      <div class="filter-row" id="entriesVehicleFilter"></div>
+      <div id="entriesList"></div>
+    </div>
+
+    <!-- REPORTS TAB -->
+    <div id="tab-reports" class="tab-panel hidden">
+      <div class="filter-row">
+        <button class="active" data-period="daily" onclick="setReportPeriod('daily')">Daily</button>
+        <button data-period="weekly" onclick="setReportPeriod('weekly')">Weekly</button>
+        <button data-period="monthly" onclick="setReportPeriod('monthly')">Monthly</button>
+        <button data-period="vehicle" onclick="setReportPeriod('vehicle')">Vehicle-wise</button>
+      </div>
+      <div id="reportContent"></div>
+      <button class="btn accent block" style="margin-top:14px;" onclick="shareReportWhatsApp()">📱 Share This Report (WhatsApp)</button>
+    </div>
+
+    <!-- VEHICLES TAB -->
+    <div id="tab-vehicles" class="tab-panel hidden">
+      <div class="card">
+        <div class="card-title">Vehicles <span style="font-size:12px;color:var(--muted);" id="vehicleCount">0</span></div>
+        <div id="vehicleChipList" class="chip-list"></div>
+        <button class="add-chip-btn" style="margin-top:12px;" onclick="openVehicleModal()">+ Add Vehicle</button>
+      </div>
+    </div>
+
+    <!-- DRIVERS TAB -->
+    <div id="tab-drivers" class="tab-panel hidden">
+      <div class="card">
+        <div class="card-title">Drivers <span style="font-size:12px;color:var(--muted);" id="driverCount">0</span></div>
+        <div id="driverChipList" class="chip-list"></div>
+        <button class="add-chip-btn" style="margin-top:12px;" onclick="openDriverModal()">+ Add Driver</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Default Commission %</div>
+        <div class="fgroup" style="margin-bottom:0;">
+          <input type="number" id="defaultCommissionInput" value="20" min="0" max="100" onchange="updateDefaultCommission(this.value)">
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <button class="fab" onclick="openEntryModal()">+</button>
+</div>
+
+<!-- Entry Modal -->
+<div class="overlay" id="entryModal">
+  <div class="sheet">
+    <h2 id="entryModalTitle">New Trip Entry</h2>
+    <div class="fgroup"><label>Date</label><input type="date" id="entryDate"></div>
+    <div class="frow">
+      <div class="fgroup"><label>Vehicle</label><select id="entryVehicle"></select></div>
+      <div class="fgroup"><label>Driver</label><select id="entryDriver"></select></div>
+    </div>
+    <div class="frow">
+      <div class="fgroup"><label>Start KM</label><input type="number" id="entryStartKM" oninput="calcDistance()"></div>
+      <div class="fgroup"><label>End KM</label><input type="number" id="entryEndKM" oninput="calcDistance()"></div>
+    </div>
+    <div class="fgroup"><label>Distance (auto)</label><input type="text" id="entryDistance" readonly style="background:#EEF2FF;font-weight:700;"></div>
+
+    <div class="fgroup"><label>Total Fare Collected (₹)</label><input type="number" id="entryFare" oninput="calcCommission()"></div>
+
+    <label style="font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.3px;">Payment Mode</label>
+    <div class="payment-toggle" id="paymentToggle">
+      <button data-mode="cash" class="sel" onclick="selectPayment('cash')">Cash</button>
+      <button data-mode="upi" onclick="selectPayment('upi')">UPI</button>
+      <button data-mode="credit" onclick="selectPayment('credit')">Credit</button>
+    </div>
+
+    <div class="frow">
+      <div class="fgroup"><label>Fuel Litres</label><input type="number" id="entryFuelLiters" oninput="calcFuel('liters')"></div>
+      <div class="fgroup"><label>Fuel Rate (₹/L)</label><input type="number" id="entryFuelRate" value="100" oninput="calcFuel('liters')"></div>
+    </div>
+    <div class="fgroup"><label>Fuel Amount (₹) — auto or edit manually</label><input type="number" id="entryFuelAmount" oninput="calcFuel('amount')"></div>
+
+    <div class="fgroup"><label>Other Expenses (₹) — toll, service, misc</label><input type="number" id="entryOtherExpense" value="0" oninput="recalcNetProfit()"></div>
+
+    <div class="frow">
+      <div class="fgroup"><label>Driver Commission %</label><input type="number" id="entryCommissionPct" value="20" oninput="calcCommission()"></div>
+      <div class="fgroup"><label>Commission Amount (₹) — auto or edit manually</label><input type="number" id="entryCommissionAmt" oninput="calcNetProfitFromManualCommission()"></div>
+    </div>
+
+    <div class="fgroup"><label>Net Profit (auto)</label><input type="text" id="entryNetProfit" readonly style="background:#E7F7F1;font-weight:800;color:var(--success);"></div>
+
+    <div class="fgroup"><label>Notes</label><textarea id="entryNotes" placeholder="Trip details, customer name etc."></textarea></div>
+
+    <div class="sheet-actions">
+      <button class="btn ghost" onclick="closeModal('entryModal')">Cancel</button>
+      <button class="btn primary" onclick="saveEntry()">Save Entry</button>
+    </div>
+  </div>
+</div>
+
+<!-- Vehicle Modal -->
+<div class="overlay" id="vehicleModal">
+  <div class="sheet">
+    <h2 id="vehicleModalTitle">Add Vehicle</h2>
+    <div class="fgroup"><label>Vehicle Name/Model</label><input id="vehicleName" placeholder="e.g. Toyota Innova"></div>
+    <div class="fgroup"><label>Registration Number</label><input id="vehicleNumber" placeholder="e.g. TN48AZ6636"></div>
+    <div class="sheet-actions">
+      <button class="btn ghost" onclick="closeModal('vehicleModal')">Cancel</button>
+      <button class="btn primary" onclick="saveVehicle()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Driver Modal -->
+<div class="overlay" id="driverModal">
+  <div class="sheet">
+    <h2 id="driverModalTitle">Add Driver</h2>
+    <div class="fgroup"><label>Driver Name</label><input id="driverName" placeholder="e.g. Punithan A"></div>
+    <div class="fgroup"><label>Phone (optional)</label><input id="driverPhone" placeholder="e.g. 98765xxxxx"></div>
+    <div class="sheet-actions">
+      <button class="btn ghost" onclick="closeModal('driverModal')">Cancel</button>
+      <button class="btn primary" onclick="saveDriver()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Config Modal -->
+<div class="overlay" id="configModal">
+  <div class="sheet">
+    <h2>Business Settings</h2>
+    <div class="fgroup"><label>Company Name</label><input id="cfgCompanyName" placeholder="e.g. GNS CABS"></div>
+    <div class="fgroup"><label>Contact Phone</label><input id="cfgPhone" placeholder="e.g. 9677904988"></div>
+    <div class="fgroup"><label>Address</label><textarea id="cfgAddress" placeholder="Business address"></textarea></div>
+    <div class="sheet-actions">
+      <button class="btn ghost" onclick="closeModal('configModal')">Cancel</button>
+      <button class="btn primary" onclick="saveConfig()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Login Modal -->
+<div class="overlay" id="adminLoginModal">
+  <div class="sheet">
+    <h2>Admin Login</h2>
+    <div class="fgroup"><label>Admin Email</label><input type="email" id="adminEmail" placeholder="admin login email"></div>
+    <div class="fgroup"><label>Password</label><input type="password" id="adminPassword" placeholder="password"></div>
+    <div id="adminLoginError" style="color:var(--danger);font-size:13px;margin-bottom:8px;"></div>
+    <div class="sheet-actions">
+      <button class="btn ghost" onclick="closeModal('adminLoginModal')">Cancel</button>
+      <button class="btn primary" onclick="adminLogin()">Login</button>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Panel Modal -->
+<div class="overlay" id="adminPanelModal">
+  <div class="sheet">
+    <h2>🔒 Admin — Subscription Control</h2>
+    <div class="fgroup">
+      <label>Status</label>
+      <select id="adminLicenseStatus">
+        <option value="active">Active</option>
+        <option value="suspended">Suspended (Manual Block)</option>
+      </select>
+    </div>
+    <div class="fgroup"><label>Expiry Date</label><input type="date" id="adminExpiryDate"></div>
+    <div class="fgroup"><label>Last Payment Date</label><input type="date" id="adminLastPayment" readonly style="background:#EEF2FF;"></div>
+    <button class="btn accent block" style="margin-bottom:14px;" onclick="recordPaymentReceived()">💰 Payment Received — Extend 1 Year</button>
+    <div class="sheet-actions">
+      <button class="btn ghost" onclick="adminLogout()">Logout</button>
+      <button class="btn primary" onclick="saveLicense()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, onValue, set, push, remove, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getAuth, signInAnonymously, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+/* ============ FIREBASE CONFIG - Set per customer ============ */
+const firebaseConfig = {
+  apiKey: "PLACEHOLDER_API_KEY",
+  databaseURL: "PLACEHOLDER_DATABASE_URL"
+};
+/* =============================================================== */
+
+const fbApp = initializeApp(firebaseConfig);
+const db = getDatabase(fbApp);
+const auth = getAuth(fbApp);
+const ROOT = "travelTracker";
+/* ============ ADMIN CONFIG - Set per customer after creating admin auth user ============ */
+const ADMIN_UID = "PLACEHOLDER_ADMIN_UID";
+/* =========================================================================================== */
+let isAdmin = false;
+
+let resolveAuthReady;
+const authReadyPromise = new Promise((resolve)=>{ resolveAuthReady = resolve; });
+onAuthStateChanged(auth, (user)=>{ if(user) resolveAuthReady(); });
+signInAnonymously(auth).catch(err=> console.error('Auth error', err));
+
+let vehicles = {}, drivers = {}, entries = {}, config = {}, license = {active:true};
+let editingEntryId = null, editingVehicleId = null, editingDriverId = null;
+let selectedPaymentMode = 'cash';
+let currentEntriesFilter = 'all';
+let currentReportPeriod = 'daily';
+
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+
+async function init(){
+  await authReadyPromise;
+  onValue(ref(db, ROOT+'/vehicles'), snap=>{ vehicles = snap.val()||{}; renderVehicles(); renderEntryDropdowns(); renderEntriesFilter(); });
+  onValue(ref(db, ROOT+'/drivers'), snap=>{ drivers = snap.val()||{}; renderDrivers(); renderEntryDropdowns(); });
+  onValue(ref(db, ROOT+'/entries'), snap=>{ entries = snap.val()||{}; renderHome(); renderEntries(); renderReports(); });
+  onValue(ref(db, ROOT+'/config'), snap=>{
+    config = snap.val()||{};
+    if(config.companyName) document.getElementById('headerCompanyName').textContent = config.companyName;
+    document.getElementById('defaultCommissionInput').value = config.defaultCommission || 20;
+  });
+  onValue(ref(db, ROOT+'/license'), snap=>{
+    license = snap.val() || {active:true};
+    checkLicenseLock();
+  });
+}
+init();
+
+/* ---------- License / Subscription Lock ---------- */
+function checkLicenseLock(){
+  const lockScreen = document.getElementById('lockScreen');
+  let locked = false;
+  let reason = '';
+  if(license.active === false){
+    locked = true;
+    reason = 'suspended';
+  } else if(license.expiryDate){
+    const today = new Date().toISOString().slice(0,10);
+    if(today > license.expiryDate){
+      locked = true;
+      reason = 'expired';
+    }
+  }
+  if(locked && !isAdmin){
+    document.getElementById('lockTitle').textContent = reason==='suspended' ? 'Account Suspended' : 'Subscription Renewal Pending';
+    const phone = config.phone || '';
+    document.getElementById('lockMessage').textContent = phone
+      ? `Your subscription needs renewal. Please contact ${phone} to continue using the app.`
+      : 'Your subscription needs renewal. Please contact support to continue using the app.';
+    lockScreen.classList.remove('hidden');
+  } else {
+    lockScreen.classList.add('hidden');
+  }
+}
+
+window.openAdminLoginModal = function(){
+  document.getElementById('adminEmail').value = '';
+  document.getElementById('adminPassword').value = '';
+  document.getElementById('adminLoginError').textContent = '';
+  document.getElementById('adminLoginModal').classList.add('show');
+};
+window.adminLogin = async function(){
+  const email = document.getElementById('adminEmail').value.trim();
+  const pw = document.getElementById('adminPassword').value;
+  if(!email || !pw){ document.getElementById('adminLoginError').textContent = 'Enter email & password'; return; }
+  try{
+    const cred = await signInWithEmailAndPassword(auth, email, pw);
+    if(cred.user.uid !== ADMIN_UID){
+      document.getElementById('adminLoginError').textContent = 'Not authorized as admin';
+      await signOut(auth);
+      await signInAnonymously(auth);
+      return;
+    }
+    isAdmin = true;
+    closeModal('adminLoginModal');
+    checkLicenseLock();
+    openAdminPanel();
+    showToast('Admin login successful');
+  }catch(err){
+    document.getElementById('adminLoginError').textContent = 'Login failed — check email/password';
+  }
+};
+window.adminLogout = async function(){
+  isAdmin = false;
+  await signOut(auth);
+  await signInAnonymously(auth);
+  closeModal('adminPanelModal');
+  checkLicenseLock();
+  showToast('Admin logged out');
+};
+window.openAdminPanel = function(){
+  document.getElementById('adminLicenseStatus').value = license.active === false ? 'suspended' : 'active';
+  document.getElementById('adminExpiryDate').value = license.expiryDate || '';
+  document.getElementById('adminLastPayment').value = license.lastPayment || '';
+  document.getElementById('adminPanelModal').classList.add('show');
+};
+window.saveLicense = async function(){
+  const active = document.getElementById('adminLicenseStatus').value === 'active';
+  const expiryDate = document.getElementById('adminExpiryDate').value;
+  await update(ref(db, ROOT+'/license'), {active, expiryDate});
+  closeModal('adminPanelModal');
+  showToast('License updated');
+};
+window.recordPaymentReceived = async function(){
+  const today = new Date();
+  const nextYear = new Date(today); nextYear.setFullYear(today.getFullYear()+1);
+  const expiryDate = nextYear.toISOString().slice(0,10);
+  const lastPayment = today.toISOString().slice(0,10);
+  document.getElementById('adminExpiryDate').value = expiryDate;
+  document.getElementById('adminLastPayment').value = lastPayment;
+  await update(ref(db, ROOT+'/license'), {active:true, expiryDate, lastPayment});
+  showToast('Payment recorded — extended to '+expiryDate);
+};
+
+/* ---------- Tabs ---------- */
+document.getElementById('tabNav').addEventListener('click', e=>{
+  const btn = e.target.closest('button'); if(!btn) return;
+  document.querySelectorAll('#tabNav button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.add('hidden'));
+  document.getElementById('tab-'+btn.dataset.tab).classList.remove('hidden');
+});
+
+/* ---------- Helpers ---------- */
+function showToast(msg){
+  const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1700);
+}
+window.closeModal = function(id){ document.getElementById(id).classList.remove('show'); };
+function fmt(n){ return '₹'+Math.round(n||0).toLocaleString('en-IN'); }
+
+/* ---------- Vehicles ---------- */
+function renderVehicles(){
+  const ids = Object.keys(vehicles);
+  document.getElementById('vehicleCount').textContent = ids.length;
+  const list = document.getElementById('vehicleChipList');
+  if(!ids.length){ list.innerHTML = '<div style="color:var(--muted);font-size:13px;">No vehicles yet. Tap + Add Vehicle.</div>'; return; }
+  list.innerHTML = ids.map(id=>{
+    const v = vehicles[id];
+    return `<div class="chip">🚗 ${v.name} — ${v.number}
+      <button onclick="editVehicle('${id}')">✏️</button>
+      <button class="del-x" onclick="deleteVehicle('${id}')">✕</button>
+    </div>`;
+  }).join('');
+}
+window.openVehicleModal = function(){
+  editingVehicleId = null;
+  document.getElementById('vehicleModalTitle').textContent = 'Add Vehicle';
+  document.getElementById('vehicleName').value=''; document.getElementById('vehicleNumber').value='';
+  document.getElementById('vehicleModal').classList.add('show');
+};
+window.editVehicle = function(id){
+  editingVehicleId = id;
+  document.getElementById('vehicleModalTitle').textContent = 'Edit Vehicle';
+  document.getElementById('vehicleName').value = vehicles[id].name;
+  document.getElementById('vehicleNumber').value = vehicles[id].number;
+  document.getElementById('vehicleModal').classList.add('show');
+};
+window.saveVehicle = async function(){
+  const name = document.getElementById('vehicleName').value.trim();
+  const number = document.getElementById('vehicleNumber').value.trim();
+  if(!name || !number){ showToast('Enter vehicle name & number'); return; }
+  if(editingVehicleId){ await update(ref(db, ROOT+'/vehicles/'+editingVehicleId), {name, number}); }
+  else { await set(push(ref(db, ROOT+'/vehicles')), {name, number}); }
+  closeModal('vehicleModal'); showToast('Vehicle saved');
+};
+window.deleteVehicle = async function(id){
+  if(!confirm('Delete this vehicle?')) return;
+  await remove(ref(db, ROOT+'/vehicles/'+id)); showToast('Vehicle deleted');
+};
+
+/* ---------- Drivers ---------- */
+function renderDrivers(){
+  const ids = Object.keys(drivers);
+  document.getElementById('driverCount').textContent = ids.length;
+  const list = document.getElementById('driverChipList');
+  if(!ids.length){ list.innerHTML = '<div style="color:var(--muted);font-size:13px;">No drivers yet. Tap + Add Driver.</div>'; return; }
+  list.innerHTML = ids.map(id=>{
+    const d = drivers[id];
+    return `<div class="chip">👤 ${d.name}${d.phone? ' · '+d.phone:''}
+      <button onclick="editDriver('${id}')">✏️</button>
+      <button class="del-x" onclick="deleteDriver('${id}')">✕</button>
+    </div>`;
+  }).join('');
+}
+window.openDriverModal = function(){
+  editingDriverId = null;
+  document.getElementById('driverModalTitle').textContent = 'Add Driver';
+  document.getElementById('driverName').value=''; document.getElementById('driverPhone').value='';
+  document.getElementById('driverModal').classList.add('show');
+};
+window.editDriver = function(id){
+  editingDriverId = id;
+  document.getElementById('driverModalTitle').textContent = 'Edit Driver';
+  document.getElementById('driverName').value = drivers[id].name;
+  document.getElementById('driverPhone').value = drivers[id].phone||'';
+  document.getElementById('driverModal').classList.add('show');
+};
+window.saveDriver = async function(){
+  const name = document.getElementById('driverName').value.trim();
+  const phone = document.getElementById('driverPhone').value.trim();
+  if(!name){ showToast('Enter driver name'); return; }
+  if(editingDriverId){ await update(ref(db, ROOT+'/drivers/'+editingDriverId), {name, phone}); }
+  else { await set(push(ref(db, ROOT+'/drivers')), {name, phone}); }
+  closeModal('driverModal'); showToast('Driver saved');
+};
+window.deleteDriver = async function(id){
+  if(!confirm('Delete this driver?')) return;
+  await remove(ref(db, ROOT+'/drivers/'+id)); showToast('Driver deleted');
+};
+window.updateDefaultCommission = async function(val){
+  await update(ref(db, ROOT+'/config'), {defaultCommission: Number(val)});
+  showToast('Default commission updated');
+};
+
+/* ---------- Entry Dropdowns ---------- */
+function renderEntryDropdowns(){
+  const vSel = document.getElementById('entryVehicle');
+  vSel.innerHTML = Object.keys(vehicles).map(id=>`<option value="${id}">${vehicles[id].name} — ${vehicles[id].number}</option>`).join('') || '<option value="">No vehicles</option>';
+  const dSel = document.getElementById('entryDriver');
+  dSel.innerHTML = Object.keys(drivers).map(id=>`<option value="${id}">${drivers[id].name}</option>`).join('') || '<option value="">No drivers</option>';
+}
+
+/* ---------- Entry Modal Logic ---------- */
+window.openEntryModal = function(){
+  editingEntryId = null;
+  document.getElementById('entryModalTitle').textContent = 'New Trip Entry';
+  document.getElementById('entryDate').value = todayStr();
+  document.getElementById('entryStartKM').value = '';
+  document.getElementById('entryEndKM').value = '';
+  document.getElementById('entryDistance').value = '';
+  document.getElementById('entryFare').value = '';
+  document.getElementById('entryFuelLiters').value = '';
+  document.getElementById('entryFuelRate').value = 100;
+  document.getElementById('entryFuelAmount').value = '';
+  document.getElementById('entryOtherExpense').value = 0;
+  document.getElementById('entryCommissionPct').value = config.defaultCommission || 20;
+  document.getElementById('entryCommissionAmt').value = '';
+  document.getElementById('entryNetProfit').value = '';
+  document.getElementById('entryNotes').value = '';
+  selectPayment('cash');
+  document.getElementById('entryModal').classList.add('show');
+};
+window.editEntry = function(id){
+  editingEntryId = id;
+  const e = entries[id];
+  document.getElementById('entryModalTitle').textContent = 'Edit Trip Entry';
+  document.getElementById('entryDate').value = e.date;
+  document.getElementById('entryVehicle').value = e.vehicleId;
+  document.getElementById('entryDriver').value = e.driverId;
+  document.getElementById('entryStartKM').value = e.startKM;
+  document.getElementById('entryEndKM').value = e.endKM;
+  document.getElementById('entryDistance').value = e.distance;
+  document.getElementById('entryFare').value = e.fare;
+  document.getElementById('entryFuelLiters').value = e.fuelLiters||'';
+  document.getElementById('entryFuelRate').value = e.fuelRate||100;
+  document.getElementById('entryFuelAmount').value = e.fuelAmount||'';
+  document.getElementById('entryOtherExpense').value = e.otherExpense||0;
+  document.getElementById('entryCommissionPct').value = e.commissionPct||20;
+  document.getElementById('entryCommissionAmt').value = e.commissionAmt||0;
+  document.getElementById('entryNetProfit').value = fmt(e.netProfit);
+  document.getElementById('entryNotes').value = e.notes||'';
+  selectPayment(e.paymentMode||'cash');
+  document.getElementById('entryModal').classList.add('show');
+};
+window.calcDistance = function(){
+  const s = parseFloat(document.getElementById('entryStartKM').value)||0;
+  const en = parseFloat(document.getElementById('entryEndKM').value)||0;
+  const dist = Math.max(0, en - s);
+  document.getElementById('entryDistance').value = dist ? dist+' km' : '';
+};
+window.calcFuel = function(source){
+  const liters = parseFloat(document.getElementById('entryFuelLiters').value)||0;
+  const rate = parseFloat(document.getElementById('entryFuelRate').value)||0;
+  if(source === 'liters' && liters && rate){
+    document.getElementById('entryFuelAmount').value = (liters*rate).toFixed(0);
+  }
+  calcNetProfitFromManualCommission();
+};
+window.selectPayment = function(mode){
+  selectedPaymentMode = mode;
+  document.querySelectorAll('#paymentToggle button').forEach(b=> b.classList.toggle('sel', b.dataset.mode===mode));
+};
+window.calcCommission = function(){
+  const fare = parseFloat(document.getElementById('entryFare').value)||0;
+  const pct = parseFloat(document.getElementById('entryCommissionPct').value)||0;
+  const commission = fare * pct/100;
+  document.getElementById('entryCommissionAmt').value = commission.toFixed(0);
+  recalcNetProfit();
+};
+window.calcNetProfitFromManualCommission = function(){
+  recalcNetProfit();
+};
+function recalcNetProfit(){
+  const fare = parseFloat(document.getElementById('entryFare').value)||0;
+  const fuel = parseFloat(document.getElementById('entryFuelAmount').value)||0;
+  const other = parseFloat(document.getElementById('entryOtherExpense').value)||0;
+  const commission = parseFloat(document.getElementById('entryCommissionAmt').value)||0;
+  const profit = fare - fuel - other - commission;
+  document.getElementById('entryNetProfit').value = fmt(profit);
+}
+
+window.saveEntry = async function(){
+  const date = document.getElementById('entryDate').value;
+  const vehicleId = document.getElementById('entryVehicle').value;
+  const driverId = document.getElementById('entryDriver').value;
+  if(!date || !vehicleId){ showToast('Fill date & vehicle'); return; }
+  const startKM = parseFloat(document.getElementById('entryStartKM').value)||0;
+  const endKM = parseFloat(document.getElementById('entryEndKM').value)||0;
+  const fare = parseFloat(document.getElementById('entryFare').value)||0;
+  const fuelLiters = parseFloat(document.getElementById('entryFuelLiters').value)||0;
+  const fuelRate = parseFloat(document.getElementById('entryFuelRate').value)||0;
+  const fuelAmount = parseFloat(document.getElementById('entryFuelAmount').value)||0;
+  const otherExpense = parseFloat(document.getElementById('entryOtherExpense').value)||0;
+  const commissionPct = parseFloat(document.getElementById('entryCommissionPct').value)||0;
+  const commissionAmt = parseFloat(document.getElementById('entryCommissionAmt').value)||0;
+  const netProfit = fare - fuelAmount - otherExpense - commissionAmt;
+  const data = {
+    date, vehicleId, driverId, startKM, endKM, distance: Math.max(0,endKM-startKM),
+    fare, paymentMode: selectedPaymentMode, fuelLiters, fuelRate, fuelAmount, otherExpense,
+    commissionPct, commissionAmt, netProfit, notes: document.getElementById('entryNotes').value.trim()
+  };
+  if(editingEntryId){ await update(ref(db, ROOT+'/entries/'+editingEntryId), data); }
+  else{ await set(push(ref(db, ROOT+'/entries')), data); }
+  closeModal('entryModal'); showToast('Entry saved');
+};
+window.deleteEntry = async function(id){
+  if(!confirm('Delete this entry?')) return;
+  await remove(ref(db, ROOT+'/entries/'+id)); showToast('Entry deleted');
+};
+
+/* ---------- Home Tab ---------- */
+function renderHome(){
+  const now = new Date();
+  const ym = now.toISOString().slice(0,7);
+  let income=0, expense=0, km=0;
+  Object.values(entries).forEach(e=>{
+    if(e.date && e.date.startsWith(ym)){
+      income += e.fare||0;
+      expense += (e.fuelAmount||0)+(e.otherExpense||0)+(e.commissionAmt||0);
+      km += e.distance||0;
+    }
+  });
+  document.getElementById('homeIncome').textContent = fmt(income);
+  document.getElementById('homeExpense').textContent = fmt(expense);
+  document.getElementById('homeProfit').textContent = fmt(income-expense);
+  document.getElementById('homeKM').textContent = km.toLocaleString('en-IN');
+
+  const sorted = Object.entries(entries).sort((a,b)=> (b[1].date||'').localeCompare(a[1].date||'')).slice(0,5);
+  const container = document.getElementById('homeRecentEntries');
+  if(!sorted.length){ container.innerHTML = '<div class="empty-state"><div class="ic">🚕</div>No entries yet. Tap + to add your first trip.</div>'; return; }
+  container.innerHTML = sorted.map(([id,e])=> entryRowHTML(id,e)).join('');
+}
+
+function entryRowHTML(id, e){
+  const v = vehicles[e.vehicleId] || {name:'—',number:''};
+  const d = drivers[e.driverId] || {name:'—'};
+  return `<div class="entry-row">
+    <div class="er-top">
+      <div><div class="er-date">${e.date}</div><div class="er-vehicle">${v.name} · ${v.number} · ${d.name}</div></div>
+      <div style="font-weight:800;color:var(--success);">${fmt(e.netProfit)}</div>
+    </div>
+    <div class="er-grid">
+      <div><span class="lbl">Fare:</span> ${fmt(e.fare)}</div>
+      <div><span class="lbl">KM:</span> ${e.distance||0}</div>
+      <div><span class="lbl">Fuel:</span> ${fmt(e.fuelAmount)}</div>
+      <div><span class="lbl">Commission:</span> ${fmt(e.commissionAmt)}</div>
+    </div>
+    <div class="er-actions">
+      <button class="edt" onclick="editEntry('${id}')">Edit</button>
+      <button class="del" onclick="deleteEntry('${id}')">Delete</button>
+    </div>
+  </div>`;
+}
+
+/* ---------- Entries Tab ---------- */
+function renderEntriesFilter(){
+  const container = document.getElementById('entriesVehicleFilter');
+  const ids = Object.keys(vehicles);
+  container.innerHTML = `<button class="${currentEntriesFilter==='all'?'active':''}" onclick="setEntriesFilter('all')">All</button>` +
+    ids.map(id=>`<button class="${currentEntriesFilter===id?'active':''}" onclick="setEntriesFilter('${id}')">${vehicles[id].number}</button>`).join('');
+}
+window.setEntriesFilter = function(id){ currentEntriesFilter = id; renderEntriesFilter(); renderEntries(); };
+function renderEntries(){
+  const container = document.getElementById('entriesList');
+  let list = Object.entries(entries);
+  if(currentEntriesFilter !== 'all') list = list.filter(([id,e])=> e.vehicleId === currentEntriesFilter);
+  list.sort((a,b)=> (b[1].date||'').localeCompare(a[1].date||''));
+  if(!list.length){ container.innerHTML = '<div class="empty-state"><div class="ic">📋</div>No entries found.</div>'; return; }
+  container.innerHTML = list.map(([id,e])=> entryRowHTML(id,e)).join('');
+}
+
+/* ---------- Reports Tab ---------- */
+window.setReportPeriod = function(p){
+  currentReportPeriod = p;
+  document.querySelectorAll('[data-period]').forEach(b=> b.classList.toggle('active', b.dataset.period===p));
+  renderReports();
+};
+function groupKey(dateStr, period){
+  const d = new Date(dateStr);
+  if(period==='daily') return dateStr;
+  if(period==='monthly') return dateStr.slice(0,7);
+  if(period==='weekly'){
+    const onejan = new Date(d.getFullYear(),0,1);
+    const week = Math.ceil((((d - onejan)/86400000) + onejan.getDay()+1)/7);
+    return d.getFullYear()+'-W'+week;
+  }
+  return dateStr;
+}
+function renderReports(){
+  const container = document.getElementById('reportContent');
+  if(currentReportPeriod === 'vehicle'){
+    const byVehicle = {};
+    Object.values(entries).forEach(e=>{
+      const key = e.vehicleId;
+      if(!byVehicle[key]) byVehicle[key] = {income:0,expense:0,km:0,trips:0};
+      byVehicle[key].income += e.fare||0;
+      byVehicle[key].expense += (e.fuelAmount||0)+(e.otherExpense||0)+(e.commissionAmt||0);
+      byVehicle[key].km += e.distance||0;
+      byVehicle[key].trips += 1;
+    });
+    const ids = Object.keys(byVehicle);
+    if(!ids.length){ container.innerHTML = '<div class="empty-state">No data yet.</div>'; return; }
+    container.innerHTML = ids.map(id=>{
+      const v = vehicles[id]||{name:'Unknown',number:''};
+      const s = byVehicle[id];
+      return `<div class="card">
+        <div class="card-title">${v.name} — ${v.number}</div>
+        <div class="er-grid" style="font-size:13.5px;">
+          <div><span class="lbl">Trips:</span> ${s.trips}</div>
+          <div><span class="lbl">KM:</span> ${s.km}</div>
+          <div><span class="lbl">Income:</span> ${fmt(s.income)}</div>
+          <div><span class="lbl">Expense:</span> ${fmt(s.expense)}</div>
+        </div>
+        <div style="margin-top:8px;font-weight:800;color:var(--success);">Net Profit: ${fmt(s.income-s.expense)}</div>
+      </div>`;
+    }).join('');
+    return;
+  }
+  const grouped = {};
+  Object.values(entries).forEach(e=>{
+    if(!e.date) return;
+    const key = groupKey(e.date, currentReportPeriod);
+    if(!grouped[key]) grouped[key] = {income:0,expense:0,km:0,trips:0};
+    grouped[key].income += e.fare||0;
+    grouped[key].expense += (e.fuelAmount||0)+(e.otherExpense||0)+(e.commissionAmt||0);
+    grouped[key].km += e.distance||0;
+    grouped[key].trips += 1;
+  });
+  const keys = Object.keys(grouped).sort().reverse();
+  if(!keys.length){ container.innerHTML = '<div class="empty-state">No data yet.</div>'; return; }
+  container.innerHTML = keys.map(key=>{
+    const s = grouped[key];
+    return `<div class="card">
+      <div class="card-title">${key}</div>
+      <div class="er-grid" style="font-size:13.5px;">
+        <div><span class="lbl">Trips:</span> ${s.trips}</div>
+        <div><span class="lbl">KM:</span> ${s.km}</div>
+        <div><span class="lbl">Income:</span> ${fmt(s.income)}</div>
+        <div><span class="lbl">Expense:</span> ${fmt(s.expense)}</div>
+      </div>
+      <div style="margin-top:8px;font-weight:800;color:var(--success);">Net Profit: ${fmt(s.income-s.expense)}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ---------- WhatsApp Share ---------- */
+window.shareMonthlyWhatsApp = function(){
+  const now = new Date();
+  const ym = now.toISOString().slice(0,7);
+  let income=0, expense=0, km=0, trips=0;
+  Object.values(entries).forEach(e=>{
+    if(e.date && e.date.startsWith(ym)){
+      income += e.fare||0;
+      expense += (e.fuelAmount||0)+(e.otherExpense||0)+(e.commissionAmt||0);
+      km += e.distance||0; trips+=1;
+    }
+  });
+  const name = config.companyName || 'Travel Tracker';
+  const msg = `*${name} - Monthly Summary*\n${ym}\n\nTrips: ${trips}\nTotal KM: ${km}\nIncome: ${fmt(income)}\nExpense: ${fmt(expense)}\nNet Profit: ${fmt(income-expense)}\n\n_Sent via ${name} App_`;
+  window.open('https://wa.me/?text='+encodeURIComponent(msg), '_blank');
+};
+window.shareReportWhatsApp = function(){
+  const name = config.companyName || 'Travel Tracker';
+  const text = document.getElementById('reportContent').innerText;
+  const msg = `*${name} - ${currentReportPeriod.toUpperCase()} Report*\n\n${text}\n\n_Sent via ${name} App_`;
+  window.open('https://wa.me/?text='+encodeURIComponent(msg), '_blank');
+};
+
+/* ---------- Config Modal ---------- */
+window.openConfigModal = function(){
+  document.getElementById('cfgCompanyName').value = config.companyName || '';
+  document.getElementById('cfgPhone').value = config.phone || '';
+  document.getElementById('cfgAddress').value = config.address || '';
+  document.getElementById('configModal').classList.add('show');
+};
+window.saveConfig = async function(){
+  const data = {
+    companyName: document.getElementById('cfgCompanyName').value.trim(),
+    phone: document.getElementById('cfgPhone').value.trim(),
+    address: document.getElementById('cfgAddress').value.trim()
+  };
+  await update(ref(db, ROOT+'/config'), data);
+  closeModal('configModal'); showToast('Settings saved');
+};
+
+document.querySelectorAll('.overlay').forEach(o=> o.addEventListener('click', e=>{ if(e.target===o) o.classList.remove('show'); }));
+
+/* ---------- Service Worker ---------- */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=> navigator.serviceWorker.register('./sw.js'));
+}
+
+/* ---------- Auto-update check ---------- */
+const CURRENT_BUILD = document.querySelector('meta[name="app-build"]').content;
+async function checkForUpdate(){
+  try{
+    const res = await fetch('./index.html?ts='+Date.now(), {cache:'no-store'});
+    const html = await res.text();
+    const match = html.match(/<meta name="app-build" content="([^"]+)"/);
+    if(match && match[1] !== CURRENT_BUILD){
+      document.getElementById('updateBanner').style.display='block';
+      setTimeout(()=> location.reload(true), 2000);
+    }
+  }catch(e){}
+}
+setInterval(checkForUpdate, 60000);
+</script>
+</body>
+</html>
