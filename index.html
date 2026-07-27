@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Travel Tracker</title>
-<meta name="app-build" content="20260728-3">
+<meta name="app-build" content="20260728-4">
 <meta name="theme-color" content="#1E3A8A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -1139,7 +1139,11 @@ async function checkForUpdate(){
     }
   }catch(e){}
 }
-setInterval(checkForUpdate, 60000);
+setInterval(checkForUpdate, 15000);
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState === 'visible') checkForUpdate();
+});
+window.addEventListener('focus', checkForUpdate);
 </script>
 </body>
 </html>
