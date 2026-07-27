@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Travel Tracker</title>
-<meta name="app-build" content="20260728-1">
+<meta name="app-build" content="20260728-2">
 <meta name="theme-color" content="#1E3A8A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -726,6 +726,12 @@ function categoryOptionsHTML(selectedId){
     `<option value="${id}" ${id===selectedId?'selected':''}>${expenseCategories[id].name}</option>`
   ).join('') || '<option value="">No categories — add in Expenses tab</option>';
 }
+function recalcExpenseTotal(){
+  const total = currentExpenseItems.reduce((sum,i)=> sum + (parseFloat(i.amount)||0), 0);
+  document.getElementById('expenseItemsTotal').textContent = fmt(total);
+  document.getElementById('entryOtherExpense').value = total;
+  recalcNetProfit();
+}
 function renderExpenseItemsList(){
   const container = document.getElementById('expenseItemsList');
   if(!currentExpenseItems.length){
@@ -734,15 +740,12 @@ function renderExpenseItemsList(){
     container.innerHTML = currentExpenseItems.map((item, idx)=>`
       <div style="display:flex;gap:8px;margin-top:8px;align-items:center;">
         <select style="flex:1.2;" onchange="updateExpenseItem(${idx}, 'categoryId', this.value)">${categoryOptionsHTML(item.categoryId)}</select>
-        <input type="number" placeholder="₹" value="${item.amount||''}" style="flex:0.8;padding:11px;border:1.5px solid var(--border);border-radius:10px;" oninput="updateExpenseItem(${idx}, 'amount', this.value)">
+        <input type="number" placeholder="₹" value="${item.amount||''}" style="flex:0.8;padding:11px;border:1.5px solid var(--border);border-radius:10px;" oninput="updateExpenseItemAmount(${idx}, this.value)">
         <button type="button" onclick="removeExpenseItem(${idx})" style="background:none;border:none;color:var(--danger);font-size:18px;">✕</button>
       </div>
     `).join('');
   }
-  const total = currentExpenseItems.reduce((sum,i)=> sum + (parseFloat(i.amount)||0), 0);
-  document.getElementById('expenseItemsTotal').textContent = fmt(total);
-  document.getElementById('entryOtherExpense').value = total;
-  recalcNetProfit();
+  recalcExpenseTotal();
 }
 window.addExpenseItemRow = function(){
   const firstCatId = Object.keys(expenseCategories)[0] || '';
@@ -751,7 +754,11 @@ window.addExpenseItemRow = function(){
 };
 window.updateExpenseItem = function(idx, field, value){
   currentExpenseItems[idx][field] = value;
-  renderExpenseItemsList();
+  recalcExpenseTotal();
+};
+window.updateExpenseItemAmount = function(idx, value){
+  currentExpenseItems[idx].amount = value;
+  recalcExpenseTotal();
 };
 window.removeExpenseItem = function(idx){
   currentExpenseItems.splice(idx, 1);
