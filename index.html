@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Travel Tracker</title>
-<meta name="app-build" content="20260727-1">
+<meta name="app-build" content="20260728-1">
 <meta name="theme-color" content="#1E3A8A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -157,6 +157,30 @@ main{padding:16px;}
   <button class="btn accent" style="margin-top:24px;" onclick="openAdminLoginModal()">Admin Login</button>
 </div>
 
+<div id="pinLockScreen" style="position:fixed;inset:0;background:linear-gradient(135deg,#1E3A8A,#12285f);z-index:600;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;color:#fff;">
+  <div style="width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,0.1);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:16px;">🔐</div>
+  <div style="font-family:'Poppins';font-size:18px;font-weight:700;margin-bottom:4px;" id="pinHeaderTitle">Enter App PIN</div>
+  <div style="font-size:13px;opacity:0.8;margin-bottom:22px;" id="pinHeaderCompany">Travel Tracker</div>
+  <div style="display:flex;gap:12px;margin-bottom:22px;" id="pinDotsRow">
+    <span class="pindot"></span><span class="pindot"></span><span class="pindot"></span><span class="pindot"></span>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,68px);gap:12px;" id="pinKeypad">
+    <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
+    <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
+    <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button>
+    <button class="pin-action" data-k="clear">Clear</button><button data-k="0">0</button><button class="pin-action" data-k="back">⌫</button>
+  </div>
+  <div style="color:#FF9F9F;font-size:13px;height:18px;margin-top:14px;" id="pinLockError"></div>
+</div>
+
+<style>
+.pindot{width:13px;height:13px;border-radius:50%;border:2px solid rgba(255,159,28,0.6);transition:all .15s;}
+.pindot.filled{background:var(--accent);border-color:var(--accent);}
+#pinKeypad button{width:68px;height:68px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);color:#fff;font-size:20px;font-weight:700;font-family:'Inter';}
+#pinKeypad button.pin-action{background:none;border:none;font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);}
+#pinKeypad button:active{background:rgba(255,255,255,0.2);}
+</style>
+
 <div id="app">
 
   <header>
@@ -176,6 +200,7 @@ main{padding:16px;}
     <button data-tab="reports">📊 Reports</button>
     <button data-tab="vehicles">🚗 Vehicles</button>
     <button data-tab="drivers">👤 Drivers</button>
+    <button data-tab="expenses">🧾 Expenses</button>
   </nav>
 
   <main>
@@ -241,6 +266,15 @@ main{padding:16px;}
       </div>
     </div>
 
+    <!-- EXPENSES TAB -->
+    <div id="tab-expenses" class="tab-panel hidden">
+      <div class="card">
+        <div class="card-title">Expense Categories <span style="font-size:12px;color:var(--muted);" id="expenseCatCount">0</span></div>
+        <div id="expenseCatChipList" class="chip-list"></div>
+        <button class="add-chip-btn" style="margin-top:12px;" onclick="openExpenseCatModal()">+ Add Category</button>
+      </div>
+    </div>
+
   </main>
 
   <button class="fab" onclick="openEntryModal()">+</button>
@@ -276,7 +310,13 @@ main{padding:16px;}
     </div>
     <div class="fgroup"><label>Fuel Amount (₹) — auto or edit manually</label><input type="number" id="entryFuelAmount" oninput="calcFuel('amount')"></div>
 
-    <div class="fgroup"><label>Other Expenses (₹) — toll, service, misc</label><input type="number" id="entryOtherExpense" value="0" oninput="recalcNetProfit()"></div>
+    <div class="fgroup">
+      <label>Additional Expenses — Workshop, Toll, Water Wash etc.</label>
+      <div id="expenseItemsList"></div>
+      <button type="button" class="add-chip-btn" style="margin-top:8px;width:100%;" onclick="addExpenseItemRow()">+ Add Expense Item</button>
+      <div style="text-align:right;font-size:13px;font-weight:700;margin-top:8px;color:var(--muted);">Total: <span id="expenseItemsTotal">₹0</span></div>
+      <input type="hidden" id="entryOtherExpense" value="0">
+    </div>
 
     <div class="frow">
       <div class="fgroup"><label>Driver Commission %</label><input type="number" id="entryCommissionPct" value="20" oninput="calcCommission()"></div>
@@ -290,6 +330,18 @@ main{padding:16px;}
     <div class="sheet-actions">
       <button class="btn ghost" onclick="closeModal('entryModal')">Cancel</button>
       <button class="btn primary" onclick="saveEntry()">Save Entry</button>
+    </div>
+  </div>
+</div>
+
+<!-- Expense Category Modal -->
+<div class="overlay" id="expenseCatModal">
+  <div class="sheet">
+    <h2 id="expenseCatModalTitle">Add Expense Category</h2>
+    <div class="fgroup"><label>Category Name</label><input id="expenseCatName" placeholder="e.g. Workshop, Petrol, Water Wash"></div>
+    <div class="sheet-actions">
+      <button class="btn ghost" onclick="closeModal('expenseCatModal')">Cancel</button>
+      <button class="btn primary" onclick="saveExpenseCategory()">Save</button>
     </div>
   </div>
 </div>
@@ -327,6 +379,7 @@ main{padding:16px;}
     <div class="fgroup"><label>Company Name</label><input id="cfgCompanyName" placeholder="e.g. GNS CABS"></div>
     <div class="fgroup"><label>Contact Phone</label><input id="cfgPhone" placeholder="e.g. 9677904988"></div>
     <div class="fgroup"><label>Address</label><textarea id="cfgAddress" placeholder="Business address"></textarea></div>
+    <div class="fgroup"><label>Change App PIN (4 digits) — leave blank to keep current</label><input type="text" id="cfgNewPin" maxlength="4" inputmode="numeric" placeholder="e.g. 4321"></div>
     <div class="sheet-actions">
       <button class="btn ghost" onclick="closeModal('configModal')">Cancel</button>
       <button class="btn primary" onclick="saveConfig()">Save</button>
@@ -362,6 +415,8 @@ main{padding:16px;}
     <div class="fgroup"><label>Expiry Date</label><input type="date" id="adminExpiryDate"></div>
     <div class="fgroup"><label>Last Payment Date</label><input type="date" id="adminLastPayment" readonly style="background:#EEF2FF;"></div>
     <button class="btn accent block" style="margin-bottom:14px;" onclick="recordPaymentReceived()">💰 Payment Received — Extend 1 Year</button>
+    <div class="fgroup"><label>Reset App PIN (4 digits)</label><input type="text" id="adminResetPin" maxlength="4" inputmode="numeric" placeholder="e.g. 1234"></div>
+    <button class="btn ghost block" style="margin-bottom:14px;" onclick="resetAppPin()">🔑 Reset PIN</button>
     <div class="sheet-actions">
       <button class="btn ghost" onclick="adminLogout()">Logout</button>
       <button class="btn primary" onclick="saveLicense()">Save</button>
@@ -397,8 +452,16 @@ const authReadyPromise = new Promise((resolve)=>{ resolveAuthReady = resolve; })
 onAuthStateChanged(auth, (user)=>{ if(user) resolveAuthReady(); });
 signInAnonymously(auth).catch(err=> console.error('Auth error', err));
 
-let vehicles = {}, drivers = {}, entries = {}, config = {}, license = {active:true};
-let editingEntryId = null, editingVehicleId = null, editingDriverId = null;
+let vehicles = {}, drivers = {}, entries = {}, config = {}, license = {active:true}, expenseCategories = {};
+let editingEntryId = null, editingVehicleId = null, editingDriverId = null, editingExpenseCatId = null;
+let currentExpenseItems = [];
+let currentPinHash = null;
+let pinBuffer = '';
+
+async function sha256(str){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
 let selectedPaymentMode = 'cash';
 let currentEntriesFilter = 'all';
 let currentReportPeriod = 'daily';
@@ -412,17 +475,62 @@ async function init(){
   onValue(ref(db, ROOT+'/entries'), snap=>{ entries = snap.val()||{}; renderHome(); renderEntries(); renderReports(); });
   onValue(ref(db, ROOT+'/config'), snap=>{
     config = snap.val()||{};
-    if(config.companyName) document.getElementById('headerCompanyName').textContent = config.companyName;
+    if(config.companyName){
+      document.getElementById('headerCompanyName').textContent = config.companyName;
+      document.getElementById('pinHeaderCompany').textContent = config.companyName;
+    }
     document.getElementById('defaultCommissionInput').value = config.defaultCommission || 20;
+    if(!config.pinHash){
+      sha256('1234').then(hash=> update(ref(db, ROOT+'/config'), {pinHash: hash}));
+    } else {
+      currentPinHash = config.pinHash;
+    }
+    checkPinLock();
   });
   onValue(ref(db, ROOT+'/license'), snap=>{
     license = snap.val() || {active:true};
     checkLicenseLock();
   });
+  onValue(ref(db, ROOT+'/expenseCategories'), snap=>{
+    expenseCategories = snap.val() || {};
+    if(Object.keys(expenseCategories).length === 0){
+      const defaults = {ec1:{name:'Workshop'}, ec2:{name:'Petrol'}, ec3:{name:'Diesel'}, ec4:{name:'Water Wash'}, ec5:{name:'Toll'}};
+      set(ref(db, ROOT+'/expenseCategories'), defaults);
+    }
+    renderExpenseCategories();
+  });
 }
 init();
 
 /* ---------- License / Subscription Lock ---------- */
+function checkPinLock(){
+  if(sessionStorage.getItem('tt_pin_unlocked') === '1'){
+    document.getElementById('pinLockScreen').style.display = 'none';
+  }
+}
+function updatePinDots(){
+  document.querySelectorAll('#pinDotsRow .pindot').forEach((d,i)=> d.classList.toggle('filled', i < pinBuffer.length));
+}
+document.getElementById('pinKeypad').addEventListener('click', async (e)=>{
+  const btn = e.target.closest('button'); if(!btn) return;
+  const k = btn.dataset.k;
+  if(k === 'clear'){ pinBuffer=''; updatePinDots(); document.getElementById('pinLockError').textContent=''; return; }
+  if(k === 'back'){ pinBuffer = pinBuffer.slice(0,-1); updatePinDots(); return; }
+  if(pinBuffer.length >= 4) return;
+  pinBuffer += k;
+  updatePinDots();
+  if(pinBuffer.length === 4){
+    const hash = await sha256(pinBuffer);
+    if(currentPinHash && hash === currentPinHash){
+      document.getElementById('pinLockScreen').style.display = 'none';
+      sessionStorage.setItem('tt_pin_unlocked','1');
+    } else {
+      document.getElementById('pinLockError').textContent = 'Wrong PIN';
+      pinBuffer=''; setTimeout(updatePinDots, 100);
+    }
+  }
+});
+
 function checkLicenseLock(){
   const lockScreen = document.getElementById('lockScreen');
   let locked = false;
@@ -497,6 +605,15 @@ window.saveLicense = async function(){
   closeModal('adminPanelModal');
   showToast('License updated');
 };
+window.resetAppPin = async function(){
+  const pin = document.getElementById('adminResetPin').value.trim();
+  if(!/^\d{4}$/.test(pin)){ showToast('Enter a 4-digit PIN'); return; }
+  const hash = await sha256(pin);
+  await update(ref(db, ROOT+'/config'), {pinHash: hash});
+  sessionStorage.removeItem('tt_pin_unlocked');
+  document.getElementById('adminResetPin').value = '';
+  showToast('App PIN reset successfully');
+};
 window.recordPaymentReceived = async function(){
   const today = new Date();
   const nextYear = new Date(today); nextYear.setFullYear(today.getFullYear()+1);
@@ -563,6 +680,82 @@ window.saveVehicle = async function(){
 window.deleteVehicle = async function(id){
   if(!confirm('Delete this vehicle?')) return;
   await remove(ref(db, ROOT+'/vehicles/'+id)); showToast('Vehicle deleted');
+};
+
+/* ---------- Expense Categories ---------- */
+function renderExpenseCategories(){
+  const ids = Object.keys(expenseCategories);
+  document.getElementById('expenseCatCount').textContent = ids.length;
+  const list = document.getElementById('expenseCatChipList');
+  if(!ids.length){ list.innerHTML = '<div style="color:var(--muted);font-size:13px;">No categories yet.</div>'; return; }
+  list.innerHTML = ids.map(id=>{
+    const c = expenseCategories[id];
+    return `<div class="chip">🧾 ${c.name}
+      <button onclick="editExpenseCategory('${id}')">✏️</button>
+      <button class="del-x" onclick="deleteExpenseCategory('${id}')">✕</button>
+    </div>`;
+  }).join('');
+}
+window.openExpenseCatModal = function(){
+  editingExpenseCatId = null;
+  document.getElementById('expenseCatModalTitle').textContent = 'Add Expense Category';
+  document.getElementById('expenseCatName').value = '';
+  document.getElementById('expenseCatModal').classList.add('show');
+};
+window.editExpenseCategory = function(id){
+  editingExpenseCatId = id;
+  document.getElementById('expenseCatModalTitle').textContent = 'Edit Expense Category';
+  document.getElementById('expenseCatName').value = expenseCategories[id].name;
+  document.getElementById('expenseCatModal').classList.add('show');
+};
+window.saveExpenseCategory = async function(){
+  const name = document.getElementById('expenseCatName').value.trim();
+  if(!name){ showToast('Enter category name'); return; }
+  if(editingExpenseCatId){ await update(ref(db, ROOT+'/expenseCategories/'+editingExpenseCatId), {name}); }
+  else { await set(push(ref(db, ROOT+'/expenseCategories')), {name}); }
+  closeModal('expenseCatModal'); showToast('Category saved');
+};
+window.deleteExpenseCategory = async function(id){
+  if(!confirm('Delete this category?')) return;
+  await remove(ref(db, ROOT+'/expenseCategories/'+id)); showToast('Category deleted');
+};
+
+/* ---------- Expense Items (within a trip entry) ---------- */
+function categoryOptionsHTML(selectedId){
+  return Object.keys(expenseCategories).map(id=>
+    `<option value="${id}" ${id===selectedId?'selected':''}>${expenseCategories[id].name}</option>`
+  ).join('') || '<option value="">No categories — add in Expenses tab</option>';
+}
+function renderExpenseItemsList(){
+  const container = document.getElementById('expenseItemsList');
+  if(!currentExpenseItems.length){
+    container.innerHTML = '<div style="color:var(--muted);font-size:12.5px;padding:6px 0;">No items added.</div>';
+  } else {
+    container.innerHTML = currentExpenseItems.map((item, idx)=>`
+      <div style="display:flex;gap:8px;margin-top:8px;align-items:center;">
+        <select style="flex:1.2;" onchange="updateExpenseItem(${idx}, 'categoryId', this.value)">${categoryOptionsHTML(item.categoryId)}</select>
+        <input type="number" placeholder="₹" value="${item.amount||''}" style="flex:0.8;padding:11px;border:1.5px solid var(--border);border-radius:10px;" oninput="updateExpenseItem(${idx}, 'amount', this.value)">
+        <button type="button" onclick="removeExpenseItem(${idx})" style="background:none;border:none;color:var(--danger);font-size:18px;">✕</button>
+      </div>
+    `).join('');
+  }
+  const total = currentExpenseItems.reduce((sum,i)=> sum + (parseFloat(i.amount)||0), 0);
+  document.getElementById('expenseItemsTotal').textContent = fmt(total);
+  document.getElementById('entryOtherExpense').value = total;
+  recalcNetProfit();
+}
+window.addExpenseItemRow = function(){
+  const firstCatId = Object.keys(expenseCategories)[0] || '';
+  currentExpenseItems.push({categoryId: firstCatId, amount: ''});
+  renderExpenseItemsList();
+};
+window.updateExpenseItem = function(idx, field, value){
+  currentExpenseItems[idx][field] = value;
+  renderExpenseItemsList();
+};
+window.removeExpenseItem = function(idx){
+  currentExpenseItems.splice(idx, 1);
+  renderExpenseItemsList();
 };
 
 /* ---------- Drivers ---------- */
@@ -635,6 +828,8 @@ window.openEntryModal = function(){
   document.getElementById('entryNetProfit').value = '';
   document.getElementById('entryNotes').value = '';
   selectPayment('cash');
+  currentExpenseItems = [];
+  renderExpenseItemsList();
   document.getElementById('entryModal').classList.add('show');
 };
 window.editEntry = function(id){
@@ -657,6 +852,8 @@ window.editEntry = function(id){
   document.getElementById('entryNetProfit').value = fmt(e.netProfit);
   document.getElementById('entryNotes').value = e.notes||'';
   selectPayment(e.paymentMode||'cash');
+  currentExpenseItems = e.expenseItems ? Object.values(e.expenseItems) : [];
+  renderExpenseItemsList();
   document.getElementById('entryModal').classList.add('show');
 };
 window.calcDistance = function(){
@@ -714,6 +911,7 @@ window.saveEntry = async function(){
   const data = {
     date, vehicleId, driverId, startKM, endKM, distance: Math.max(0,endKM-startKM),
     fare, paymentMode: selectedPaymentMode, fuelLiters, fuelRate, fuelAmount, otherExpense,
+    expenseItems: currentExpenseItems.filter(i=>i.amount),
     commissionPct, commissionAmt, netProfit, notes: document.getElementById('entryNotes').value.trim()
   };
   if(editingEntryId){ await update(ref(db, ROOT+'/entries/'+editingEntryId), data); }
@@ -888,6 +1086,7 @@ window.openConfigModal = function(){
   document.getElementById('cfgCompanyName').value = config.companyName || '';
   document.getElementById('cfgPhone').value = config.phone || '';
   document.getElementById('cfgAddress').value = config.address || '';
+  document.getElementById('cfgNewPin').value = '';
   document.getElementById('configModal').classList.add('show');
 };
 window.saveConfig = async function(){
@@ -896,6 +1095,11 @@ window.saveConfig = async function(){
     phone: document.getElementById('cfgPhone').value.trim(),
     address: document.getElementById('cfgAddress').value.trim()
   };
+  const newPin = document.getElementById('cfgNewPin').value.trim();
+  if(newPin){
+    if(!/^\d{4}$/.test(newPin)){ showToast('PIN must be exactly 4 digits'); return; }
+    data.pinHash = await sha256(newPin);
+  }
   await update(ref(db, ROOT+'/config'), data);
   closeModal('configModal'); showToast('Settings saved');
 };
