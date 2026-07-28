@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Travel Tracker</title>
-<meta name="app-build" content="20260728-15">
+<meta name="app-build" content="20260728-16">
 <meta name="theme-color" content="#1E3A8A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -514,11 +514,8 @@ function checkLicenseLock(){
     }
   }
   if(locked){
-    document.getElementById('lockTitle').textContent = reason==='suspended' ? 'Account Suspended' : 'Subscription Renewal Pending';
-    const phone = config.phone || '';
-    document.getElementById('lockMessage').textContent = phone
-      ? `Your subscription needs renewal. Please contact ${phone} to continue using the app.`
-      : 'Your subscription needs renewal. Please contact support to continue using the app.';
+    document.getElementById('lockTitle').textContent = 'Account Suspended';
+    document.getElementById('lockMessage').textContent = 'Your subscription needs renewal.';
     lockScreen.classList.remove('hidden');
   } else {
     lockScreen.classList.add('hidden');
