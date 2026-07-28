@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Travel Tracker</title>
-<meta name="app-build" content="20260728-7">
+<meta name="app-build" content="20260728-8">
 <meta name="theme-color" content="#1E3A8A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -472,7 +472,11 @@ async function init(){
   await authReadyPromise;
   onValue(ref(db, ROOT+'/vehicles'), snap=>{ vehicles = snap.val()||{}; renderVehicles(); renderEntryDropdowns(); renderEntriesFilter(); });
   onValue(ref(db, ROOT+'/drivers'), snap=>{ drivers = snap.val()||{}; renderDrivers(); renderEntryDropdowns(); });
-  onValue(ref(db, ROOT+'/entries'), snap=>{ entries = snap.val()||{}; renderHome(); renderEntries(); renderReports(); });
+  onValue(ref(db, ROOT+'/entries'), snap=>{
+    entries = snap.val()||{};
+    renderHome(); renderEntries(); renderReports();
+    update(ref(db, ROOT+'/activity'), {totalEntries: Object.keys(entries).length});
+  });
   onValue(ref(db, ROOT+'/config'), snap=>{
     config = snap.val()||{};
     if(config.companyName){
@@ -508,6 +512,7 @@ init();
 function checkPinLock(){
   if(sessionStorage.getItem('tt_pin_unlocked') === '1'){
     document.getElementById('pinLockScreen').style.display = 'none';
+    update(ref(db, ROOT+'/activity'), {lastActive: new Date().toISOString()});
   }
 }
 function updatePinDots(){
@@ -526,6 +531,7 @@ document.getElementById('pinKeypad').addEventListener('click', async (e)=>{
     if(currentPinHash && hash === currentPinHash){
       document.getElementById('pinLockScreen').style.display = 'none';
       sessionStorage.setItem('tt_pin_unlocked','1');
+      update(ref(db, ROOT+'/activity'), {lastActive: new Date().toISOString()});
     } else {
       document.getElementById('pinLockError').textContent = 'Wrong PIN';
       pinBuffer=''; setTimeout(updatePinDots, 100);
