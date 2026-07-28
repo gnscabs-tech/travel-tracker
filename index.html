@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Travel Tracker</title>
-<meta name="app-build" content="20260728-9">
+<meta name="app-build" content="20260728-10">
 <meta name="theme-color" content="#1E3A8A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -186,10 +186,9 @@ main{padding:16px;}
   <header>
     <div class="top-row">
       <div>
-        <h1 id="headerCompanyName">GNS CABS</h1>
+        <h1 id="headerCompanyName" ontouchstart="startAdminLongPress()" ontouchend="cancelAdminLongPress()" onmousedown="startAdminLongPress()" onmouseup="cancelAdminLongPress()" onmouseleave="cancelAdminLongPress()">GNS CABS</h1>
         <div class="sub">Travel &amp; Vehicle Tracker</div>
       </div>
-      <button class="icon-btn" onclick="openAdminLoginModal()" style="margin-right:8px;">🔒</button>
       <button class="icon-btn" onclick="openConfigModal()">⚙️</button>
     </div>
   </header>
@@ -566,6 +565,13 @@ function checkLicenseLock(){
   }
 }
 
+let adminLongPressTimer = null;
+window.startAdminLongPress = function(){
+  adminLongPressTimer = setTimeout(()=>{ openAdminLoginModal(); }, 1500);
+};
+window.cancelAdminLongPress = function(){
+  if(adminLongPressTimer){ clearTimeout(adminLongPressTimer); adminLongPressTimer = null; }
+};
 window.openAdminLoginModal = function(){
   document.getElementById('adminEmail').value = '';
   document.getElementById('adminPassword').value = '';
