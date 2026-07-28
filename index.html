@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Travel Tracker</title>
-<meta name="app-build" content="20260728-1708">
+<meta name="app-build" content="20260728-2257">
 <meta name="theme-color" content="#1E3A8A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -186,19 +186,20 @@ main{padding:16px;}
     <div class="top-row">
       <div>
         <h1 id="headerCompanyName">GNS CABS</h1>
-        <div class="sub">Travel &amp; Vehicle Tracker</div>
+        <div class="sub" data-i18n="subTitle">Travel &amp; Vehicle Tracker</div>
       </div>
+      <button class="icon-btn" id="langToggleBtn" onclick="toggleLanguage()" style="margin-right:8px;font-size:13px;font-weight:700;">🌐 EN</button>
       <button class="icon-btn" onclick="openConfigModal()">⚙️</button>
     </div>
   </header>
 
   <nav class="tabs" id="tabNav">
-    <button class="active" data-tab="home">🏠 Home</button>
-    <button data-tab="entries">📋 Entries</button>
-    <button data-tab="reports">📊 Reports</button>
-    <button data-tab="vehicles">🚗 Vehicles</button>
-    <button data-tab="drivers">👤 Drivers</button>
-    <button data-tab="expenses">🧾 Expenses</button>
+    <button class="active" data-tab="home">🏠 <span data-i18n="tabHome">Home</span></button>
+    <button data-tab="entries">📋 <span data-i18n="tabEntries">Entries</span></button>
+    <button data-tab="reports">📊 <span data-i18n="tabReports">Reports</span></button>
+    <button data-tab="vehicles">🚗 <span data-i18n="tabVehicles">Vehicles</span></button>
+    <button data-tab="drivers">👤 <span data-i18n="tabDrivers">Drivers</span></button>
+    <button data-tab="expenses">🧾 <span data-i18n="tabExpenses">Expenses</span></button>
   </nav>
 
   <main>
@@ -207,19 +208,19 @@ main{padding:16px;}
     <div id="tab-home" class="tab-panel">
       <div id="subscriptionBanner" class="hidden" style="border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:13px;font-weight:700;"></div>
       <div class="stat-grid">
-        <div class="stat-box income"><div class="val" id="homeIncome">₹0</div><div class="lbl">This Month Income</div></div>
-        <div class="stat-box expense"><div class="val" id="homeExpense">₹0</div><div class="lbl">This Month Expense</div></div>
-        <div class="stat-box profit"><div class="val" id="homeProfit">₹0</div><div class="lbl">Net Profit</div></div>
-        <div class="stat-box km"><div class="val" id="homeKM">0</div><div class="lbl">Total KM</div></div>
+        <div class="stat-box income"><div class="val" id="homeIncome">₹0</div><div class="lbl" data-i18n="lblIncome">This Month Income</div></div>
+        <div class="stat-box expense"><div class="val" id="homeExpense">₹0</div><div class="lbl" data-i18n="lblExpense">This Month Expense</div></div>
+        <div class="stat-box profit"><div class="val" id="homeProfit">₹0</div><div class="lbl" data-i18n="lblProfit">Net Profit</div></div>
+        <div class="stat-box km"><div class="val" id="homeKM">0</div><div class="lbl" data-i18n="lblKM">Total KM</div></div>
       </div>
 
       <div class="card">
-        <div class="card-title">Quick Actions</div>
-        <button class="btn primary block" style="margin-bottom:10px;" onclick="openEntryModal()">+ Add Today's Trip Entry</button>
-        <button class="btn wa block" onclick="shareMonthlyWhatsApp()">📱 Share Monthly Summary (WhatsApp)</button>
+        <div class="card-title" data-i18n="quickActions">Quick Actions</div>
+        <button class="btn primary block" style="margin-bottom:10px;" onclick="openEntryModal()">+ <span data-i18n="btnAddTrip">Add Today's Trip Entry</span></button>
+        <button class="btn wa block" onclick="shareMonthlyWhatsApp()">📱 <span data-i18n="btnShareMonthly">Share Monthly Summary (WhatsApp)</span></button>
       </div>
 
-      <div class="section-label">Recent Entries</div>
+      <div class="section-label" data-i18n="recentEntries">Recent Entries</div>
       <div id="homeRecentEntries"></div>
     </div>
 
@@ -232,33 +233,33 @@ main{padding:16px;}
     <!-- REPORTS TAB -->
     <div id="tab-reports" class="tab-panel hidden">
       <div class="filter-row">
-        <button class="active" data-period="daily" onclick="setReportPeriod('daily')">Daily</button>
-        <button data-period="weekly" onclick="setReportPeriod('weekly')">Weekly</button>
-        <button data-period="monthly" onclick="setReportPeriod('monthly')">Monthly</button>
-        <button data-period="vehicle" onclick="setReportPeriod('vehicle')">Vehicle-wise</button>
+        <button class="active" data-period="daily" onclick="setReportPeriod('daily')" data-i18n="periodDaily">Daily</button>
+        <button data-period="weekly" onclick="setReportPeriod('weekly')" data-i18n="periodWeekly">Weekly</button>
+        <button data-period="monthly" onclick="setReportPeriod('monthly')" data-i18n="periodMonthly">Monthly</button>
+        <button data-period="vehicle" onclick="setReportPeriod('vehicle')" data-i18n="periodVehicle">Vehicle-wise</button>
       </div>
       <div id="reportContent"></div>
-      <button class="btn accent block" style="margin-top:14px;" onclick="shareReportWhatsApp()">📱 Share This Report (WhatsApp)</button>
+      <button class="btn accent block" style="margin-top:14px;" onclick="shareReportWhatsApp()">📱 <span data-i18n="btnShareReport">Share This Report (WhatsApp)</span></button>
     </div>
 
     <!-- VEHICLES TAB -->
     <div id="tab-vehicles" class="tab-panel hidden">
       <div class="card">
-        <div class="card-title">Vehicles <span style="font-size:12px;color:var(--muted);" id="vehicleCount">0</span></div>
+        <div class="card-title"><span data-i18n="vehiclesTitle">Vehicles</span> <span style="font-size:12px;color:var(--muted);" id="vehicleCount">0</span></div>
         <div id="vehicleChipList" class="chip-list"></div>
-        <button class="add-chip-btn" style="margin-top:12px;" onclick="openVehicleModal()">+ Add Vehicle</button>
+        <button class="add-chip-btn" style="margin-top:12px;" onclick="openVehicleModal()">+ <span data-i18n="btnAddVehicle">Add Vehicle</span></button>
       </div>
     </div>
 
     <!-- DRIVERS TAB -->
     <div id="tab-drivers" class="tab-panel hidden">
       <div class="card">
-        <div class="card-title">Drivers <span style="font-size:12px;color:var(--muted);" id="driverCount">0</span></div>
+        <div class="card-title"><span data-i18n="driversTitle">Drivers</span> <span style="font-size:12px;color:var(--muted);" id="driverCount">0</span></div>
         <div id="driverChipList" class="chip-list"></div>
-        <button class="add-chip-btn" style="margin-top:12px;" onclick="openDriverModal()">+ Add Driver</button>
+        <button class="add-chip-btn" style="margin-top:12px;" onclick="openDriverModal()">+ <span data-i18n="btnAddDriver">Add Driver</span></button>
       </div>
       <div class="card">
-        <div class="card-title">Default Commission %</div>
+        <div class="card-title" data-i18n="defaultCommission">Default Commission %</div>
         <div class="fgroup" style="margin-bottom:0;">
           <input type="number" id="defaultCommissionInput" value="20" min="0" max="100" onchange="updateDefaultCommission(this.value)">
         </div>
@@ -268,9 +269,9 @@ main{padding:16px;}
     <!-- EXPENSES TAB -->
     <div id="tab-expenses" class="tab-panel hidden">
       <div class="card">
-        <div class="card-title">Expense Categories <span style="font-size:12px;color:var(--muted);" id="expenseCatCount">0</span></div>
+        <div class="card-title"><span data-i18n="expenseCatTitle">Expense Categories</span> <span style="font-size:12px;color:var(--muted);" id="expenseCatCount">0</span></div>
         <div id="expenseCatChipList" class="chip-list"></div>
-        <button class="add-chip-btn" style="margin-top:12px;" onclick="openExpenseCatModal()">+ Add Category</button>
+        <button class="add-chip-btn" style="margin-top:12px;" onclick="openExpenseCatModal()">+ <span data-i18n="btnAddCategory">Add Category</span></button>
       </div>
     </div>
 
@@ -414,6 +415,51 @@ signInAnonymously(auth).catch(err=> console.error('Auth error', err));
 
 let vehicles = {}, drivers = {}, entries = {}, config = {}, license = {active:true}, expenseCategories = {};
 let editingEntryId = null, editingVehicleId = null, editingDriverId = null, editingExpenseCatId = null;
+
+/* ---------- Language Toggle (EN / TA) ---------- */
+const I18N = {
+  en: {
+    subTitle:"Travel & Vehicle Tracker", tabHome:"Home", tabEntries:"Entries", tabReports:"Reports",
+    tabVehicles:"Vehicles", tabDrivers:"Drivers", tabExpenses:"Expenses",
+    lblIncome:"This Month Income", lblExpense:"This Month Expense", lblProfit:"Net Profit", lblKM:"Total KM",
+    quickActions:"Quick Actions", btnAddTrip:"Add Today's Trip Entry", btnShareMonthly:"Share Monthly Summary (WhatsApp)",
+    recentEntries:"Recent Entries",
+    periodDaily:"Daily", periodWeekly:"Weekly", periodMonthly:"Monthly", periodVehicle:"Vehicle-wise",
+    btnShareReport:"Share This Report (WhatsApp)",
+    vehiclesTitle:"Vehicles", btnAddVehicle:"Add Vehicle",
+    driversTitle:"Drivers", btnAddDriver:"Add Driver", defaultCommission:"Default Commission %",
+    expenseCatTitle:"Expense Categories", btnAddCategory:"Add Category"
+  },
+  ta: {
+    subTitle:"பயண & வாகன கண்காணிப்பு", tabHome:"முகப்பு", tabEntries:"பதிவுகள்", tabReports:"அறிக்கைகள்",
+    tabVehicles:"வாகனங்கள்", tabDrivers:"ஓட்டுநர்கள்", tabExpenses:"செலவுகள்",
+    lblIncome:"இந்த மாத வருமானம்", lblExpense:"இந்த மாத செலவு", lblProfit:"நிகர லாபம்", lblKM:"மொத்த கி.மீ",
+    quickActions:"விரைவு செயல்கள்", btnAddTrip:"இன்றைய பயணப் பதிவைச் சேர்", btnShareMonthly:"மாத சுருக்கத்தை பகிர் (WhatsApp)",
+    recentEntries:"சமீபத்திய பதிவுகள்",
+    periodDaily:"தினசரி", periodWeekly:"வாராந்திர", periodMonthly:"மாதாந்திர", periodVehicle:"வாகன வாரியாக",
+    btnShareReport:"இந்த அறிக்கையைப் பகிர் (WhatsApp)",
+    vehiclesTitle:"வாகனங்கள்", btnAddVehicle:"வாகனம் சேர்",
+    driversTitle:"ஓட்டுநர்கள்", btnAddDriver:"ஓட்டுநர் சேர்", defaultCommission:"இயல்புநிலை கமிஷன் %",
+    expenseCatTitle:"செலவு வகைகள்", btnAddCategory:"வகை சேர்"
+  }
+};
+function applyLanguage(lang){
+  const dict = I18N[lang] || I18N.en;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.getAttribute('data-i18n');
+    if(dict[key]) el.textContent = dict[key];
+  });
+  const btn = document.getElementById('langToggleBtn');
+  if(btn) btn.textContent = lang==='ta' ? '🌐 தமிழ்' : '🌐 EN';
+  localStorage.setItem('gnscabs_lang', lang);
+}
+window.toggleLanguage = function(){
+  const current = localStorage.getItem('gnscabs_lang') || 'en';
+  const next = current==='en' ? 'ta' : 'en';
+  applyLanguage(next);
+};
+applyLanguage(localStorage.getItem('gnscabs_lang') || 'en');
+
 let currentExpenseItems = [];
 let currentPinHash = null;
 let pinBuffer = '';
