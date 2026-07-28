@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Travel Tracker</title>
-<meta name="app-build" content="20260728-10">
+<meta name="app-build" content="20260728-11">
 <meta name="theme-color" content="#1E3A8A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -154,7 +154,6 @@ main{padding:16px;}
   <div style="font-size:48px;margin-bottom:16px;">🔒</div>
   <div style="font-size:19px;font-weight:800;font-family:'Poppins';margin-bottom:10px;" id="lockTitle">Subscription Renewal Pending</div>
   <div style="font-size:14px;opacity:0.85;max-width:340px;line-height:1.6;" id="lockMessage">Your subscription has expired. Please contact support to renew and continue using the app.</div>
-  <button class="btn accent" style="margin-top:24px;" onclick="openAdminLoginModal()">Admin Login</button>
 </div>
 
 <div id="pinLockScreen" style="position:fixed;inset:0;background:linear-gradient(135deg,#1E3A8A,#12285f);z-index:600;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;color:#fff;">
@@ -186,7 +185,7 @@ main{padding:16px;}
   <header>
     <div class="top-row">
       <div>
-        <h1 id="headerCompanyName" ontouchstart="startAdminLongPress()" ontouchend="cancelAdminLongPress()" onmousedown="startAdminLongPress()" onmouseup="cancelAdminLongPress()" onmouseleave="cancelAdminLongPress()">GNS CABS</h1>
+        <h1 id="headerCompanyName">GNS CABS</h1>
         <div class="sub">Travel &amp; Vehicle Tracker</div>
       </div>
       <button class="icon-btn" onclick="openConfigModal()">⚙️</button>
@@ -386,50 +385,12 @@ main{padding:16px;}
   </div>
 </div>
 
-<!-- Admin Login Modal -->
-<div class="overlay" id="adminLoginModal">
-  <div class="sheet">
-    <h2>Admin Login</h2>
-    <div class="fgroup"><label>Admin Email</label><input type="email" id="adminEmail" placeholder="admin login email"></div>
-    <div class="fgroup"><label>Password</label><input type="password" id="adminPassword" placeholder="password"></div>
-    <div id="adminLoginError" style="color:var(--danger);font-size:13px;margin-bottom:8px;"></div>
-    <div class="sheet-actions">
-      <button class="btn ghost" onclick="closeModal('adminLoginModal')">Cancel</button>
-      <button class="btn primary" onclick="adminLogin()">Login</button>
-    </div>
-  </div>
-</div>
-
-<!-- Admin Panel Modal -->
-<div class="overlay" id="adminPanelModal">
-  <div class="sheet">
-    <h2>🔒 Admin — Subscription Control</h2>
-    <div class="fgroup">
-      <label>Status</label>
-      <select id="adminLicenseStatus">
-        <option value="active">Active</option>
-        <option value="suspended">Suspended (Manual Block)</option>
-      </select>
-    </div>
-    <div class="fgroup"><label>Expiry Date</label><input type="date" id="adminExpiryDate" oninput="updateCountdownDisplay()"></div>
-    <div id="adminCountdownDisplay" style="font-size:13px;font-weight:700;margin:-8px 0 14px;"></div>
-    <div class="fgroup"><label>Last Payment Date</label><input type="date" id="adminLastPayment" readonly style="background:#EEF2FF;"></div>
-    <button class="btn accent block" style="margin-bottom:14px;" onclick="recordPaymentReceived()">💰 Payment Received — Extend 1 Year</button>
-    <div class="fgroup"><label>Reset App PIN (4 digits)</label><input type="text" id="adminResetPin" maxlength="4" inputmode="numeric" placeholder="e.g. 1234"></div>
-    <button class="btn ghost block" style="margin-bottom:14px;" onclick="resetAppPin()">🔑 Reset PIN</button>
-    <div class="sheet-actions">
-      <button class="btn ghost" onclick="adminLogout()">Logout</button>
-      <button class="btn primary" onclick="saveLicense()">Save</button>
-    </div>
-  </div>
-</div>
-
 <div class="toast" id="toast"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getDatabase, ref, onValue, set, push, remove, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-import { getAuth, signInAnonymously, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 /* ============ FIREBASE CONFIG - Set per customer ============ */
 const firebaseConfig = {
@@ -442,10 +403,8 @@ const fbApp = initializeApp(firebaseConfig);
 const db = getDatabase(fbApp);
 const auth = getAuth(fbApp);
 const ROOT = "travelTracker";
-/* ============ ADMIN CONFIG - Set per customer after creating admin auth user ============ */
-const ADMIN_UID = "Xkg8bIFd9efeqq2DkjjNxgd25BA3";
-/* =========================================================================================== */
-let isAdmin = false;
+/* Admin control (license enable/disable, PIN reset) is managed remotely via the
+   TrackMyApp Master Control Panel, not from within this customer-facing app. */
 
 let resolveAuthReady;
 const authReadyPromise = new Promise((resolve)=>{ resolveAuthReady = resolve; });
@@ -553,7 +512,7 @@ function checkLicenseLock(){
       reason = 'expired';
     }
   }
-  if(locked && !isAdmin){
+  if(locked){
     document.getElementById('lockTitle').textContent = reason==='suspended' ? 'Account Suspended' : 'Subscription Renewal Pending';
     const phone = config.phone || '';
     document.getElementById('lockMessage').textContent = phone
@@ -564,95 +523,6 @@ function checkLicenseLock(){
     lockScreen.classList.add('hidden');
   }
 }
-
-let adminLongPressTimer = null;
-window.startAdminLongPress = function(){
-  adminLongPressTimer = setTimeout(()=>{ openAdminLoginModal(); }, 1500);
-};
-window.cancelAdminLongPress = function(){
-  if(adminLongPressTimer){ clearTimeout(adminLongPressTimer); adminLongPressTimer = null; }
-};
-window.openAdminLoginModal = function(){
-  document.getElementById('adminEmail').value = '';
-  document.getElementById('adminPassword').value = '';
-  document.getElementById('adminLoginError').textContent = '';
-  document.getElementById('adminLoginModal').classList.add('show');
-};
-window.adminLogin = async function(){
-  const email = document.getElementById('adminEmail').value.trim();
-  const pw = document.getElementById('adminPassword').value;
-  if(!email || !pw){ document.getElementById('adminLoginError').textContent = 'Enter email & password'; return; }
-  try{
-    const cred = await signInWithEmailAndPassword(auth, email, pw);
-    if(cred.user.uid !== ADMIN_UID){
-      document.getElementById('adminLoginError').textContent = 'Not authorized as admin';
-      await signOut(auth);
-      await signInAnonymously(auth);
-      return;
-    }
-    isAdmin = true;
-    closeModal('adminLoginModal');
-    checkLicenseLock();
-    openAdminPanel();
-    showToast('Admin login successful');
-  }catch(err){
-    document.getElementById('adminLoginError').textContent = 'Login failed — check email/password';
-  }
-};
-window.adminLogout = async function(){
-  isAdmin = false;
-  await signOut(auth);
-  await signInAnonymously(auth);
-  closeModal('adminPanelModal');
-  checkLicenseLock();
-  showToast('Admin logged out');
-};
-window.openAdminPanel = function(){
-  document.getElementById('adminLicenseStatus').value = license.active === false ? 'suspended' : 'active';
-  document.getElementById('adminExpiryDate').value = license.expiryDate || '';
-  document.getElementById('adminLastPayment').value = license.lastPayment || '';
-  updateCountdownDisplay();
-  document.getElementById('adminPanelModal').classList.add('show');
-};
-window.updateCountdownDisplay = function(){
-  const val = document.getElementById('adminExpiryDate').value;
-  const el = document.getElementById('adminCountdownDisplay');
-  if(!val){ el.textContent = ''; return; }
-  const days = Math.ceil((new Date(val) - new Date()) / 86400000);
-  let color = '#06A77D', text = days+' days remaining';
-  if(days < 0){ color = '#E63946'; text = 'Expired '+Math.abs(days)+' days ago'; }
-  else if(days <= 7){ color = '#E63946'; }
-  else if(days <= 30){ color = '#FF9F1C'; }
-  el.style.color = color;
-  el.textContent = '⏳ '+text;
-};
-window.saveLicense = async function(){
-  const active = document.getElementById('adminLicenseStatus').value === 'active';
-  const expiryDate = document.getElementById('adminExpiryDate').value;
-  await update(ref(db, ROOT+'/license'), {active, expiryDate});
-  closeModal('adminPanelModal');
-  showToast('License updated');
-};
-window.resetAppPin = async function(){
-  const pin = document.getElementById('adminResetPin').value.trim();
-  if(!/^\d{4}$/.test(pin)){ showToast('Enter a 4-digit PIN'); return; }
-  const hash = await sha256(pin);
-  await update(ref(db, ROOT+'/config'), {pinHash: hash});
-  sessionStorage.removeItem('tt_pin_unlocked');
-  document.getElementById('adminResetPin').value = '';
-  showToast('App PIN reset successfully');
-};
-window.recordPaymentReceived = async function(){
-  const today = new Date();
-  const nextYear = new Date(today); nextYear.setFullYear(today.getFullYear()+1);
-  const expiryDate = nextYear.toISOString().slice(0,10);
-  const lastPayment = today.toISOString().slice(0,10);
-  document.getElementById('adminExpiryDate').value = expiryDate;
-  document.getElementById('adminLastPayment').value = lastPayment;
-  updateCountdownDisplay();
-  await update(ref(db, ROOT+'/license'), {active:true, expiryDate, lastPayment});
-  showToast('Payment recorded — extended to '+expiryDate);
-};
 
 /* ---------- Tabs ---------- */
 document.getElementById('tabNav').addEventListener('click', e=>{
