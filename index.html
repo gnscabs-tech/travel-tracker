@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Travel Tracker</title>
-<meta name="app-build" content="20260728-11">
+<meta name="app-build" content="20260728-12">
 <meta name="theme-color" content="#1E3A8A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -205,6 +205,7 @@ main{padding:16px;}
 
     <!-- HOME TAB -->
     <div id="tab-home" class="tab-panel">
+      <div id="subscriptionBanner" class="hidden" style="border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:13px;font-weight:700;"></div>
       <div class="stat-grid">
         <div class="stat-box income"><div class="val" id="homeIncome">₹0</div><div class="lbl">This Month Income</div></div>
         <div class="stat-box expense"><div class="val" id="homeExpense">₹0</div><div class="lbl">This Month Expense</div></div>
@@ -522,6 +523,21 @@ function checkLicenseLock(){
   } else {
     lockScreen.classList.add('hidden');
   }
+  updateSubscriptionBanner();
+}
+function updateSubscriptionBanner(){
+  const banner = document.getElementById('subscriptionBanner');
+  if(!license.expiryDate){ banner.classList.add('hidden'); return; }
+  const days = Math.ceil((new Date(license.expiryDate) - new Date()) / 86400000);
+  if(days > 30){ banner.classList.add('hidden'); return; }
+  banner.classList.remove('hidden');
+  let bg = '#E7F7F1', color = 'var(--success)', text = days+' days left on your subscription';
+  if(days < 0){ bg = '#FDE8E8'; color = 'var(--danger)'; text = 'Subscription expired '+Math.abs(days)+' days ago — please renew'; }
+  else if(days <= 7){ bg = '#FDE8E8'; color = 'var(--danger)'; text = 'Only '+days+' days left — please renew soon'; }
+  else { bg = '#FFF6E5'; color = '#B8860B'; }
+  banner.style.background = bg;
+  banner.style.color = color;
+  banner.textContent = '⏳ '+text;
 }
 
 /* ---------- Tabs ---------- */
