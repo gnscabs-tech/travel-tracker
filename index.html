@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Travel Tracker</title>
-<meta name="app-build" content="20260728-13">
+<meta name="app-build" content="20260728-14">
 <meta name="theme-color" content="#1E3A8A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -529,12 +529,12 @@ function updateSubscriptionBanner(){
   const banner = document.getElementById('subscriptionBanner');
   if(!license.expiryDate){ banner.classList.add('hidden'); return; }
   const days = Math.ceil((new Date(license.expiryDate) - new Date()) / 86400000);
-  if(days > 30){ banner.classList.add('hidden'); return; }
   banner.classList.remove('hidden');
-  let bg = '#06A77D', color = '#FFFFFF', text = days+' days left on your subscription';
-  if(days < 0){ bg = '#E63946'; color = '#FFFFFF'; text = 'Subscription expired '+Math.abs(days)+' days ago — please renew'; }
-  else if(days <= 7){ bg = '#E63946'; color = '#FFFFFF'; text = 'Only '+days+' days left — please renew soon'; }
-  else { bg = '#FF9F1C'; color = '#FFFFFF'; }
+  let bg, color = '#FFFFFF', text = days+' days left on your subscription';
+  if(days < 0){ bg = '#E63946'; text = 'Subscription expired '+Math.abs(days)+' days ago — please renew'; }
+  else if(days <= 7){ bg = '#E63946'; text = 'Only '+days+' days left — please renew soon'; }
+  else if(days <= 30){ bg = '#FF9F1C'; }
+  else { bg = '#06A77D'; }
   banner.style.background = bg;
   banner.style.color = color;
   banner.style.fontWeight = '800';
