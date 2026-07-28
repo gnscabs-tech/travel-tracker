@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Travel Tracker</title>
-<meta name="app-build" content="20260728-8">
+<meta name="app-build" content="20260728-9">
 <meta name="theme-color" content="#1E3A8A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -412,7 +412,8 @@ main{padding:16px;}
         <option value="suspended">Suspended (Manual Block)</option>
       </select>
     </div>
-    <div class="fgroup"><label>Expiry Date</label><input type="date" id="adminExpiryDate"></div>
+    <div class="fgroup"><label>Expiry Date</label><input type="date" id="adminExpiryDate" oninput="updateCountdownDisplay()"></div>
+    <div id="adminCountdownDisplay" style="font-size:13px;font-weight:700;margin:-8px 0 14px;"></div>
     <div class="fgroup"><label>Last Payment Date</label><input type="date" id="adminLastPayment" readonly style="background:#EEF2FF;"></div>
     <button class="btn accent block" style="margin-bottom:14px;" onclick="recordPaymentReceived()">💰 Payment Received — Extend 1 Year</button>
     <div class="fgroup"><label>Reset App PIN (4 digits)</label><input type="text" id="adminResetPin" maxlength="4" inputmode="numeric" placeholder="e.g. 1234"></div>
@@ -604,7 +605,20 @@ window.openAdminPanel = function(){
   document.getElementById('adminLicenseStatus').value = license.active === false ? 'suspended' : 'active';
   document.getElementById('adminExpiryDate').value = license.expiryDate || '';
   document.getElementById('adminLastPayment').value = license.lastPayment || '';
+  updateCountdownDisplay();
   document.getElementById('adminPanelModal').classList.add('show');
+};
+window.updateCountdownDisplay = function(){
+  const val = document.getElementById('adminExpiryDate').value;
+  const el = document.getElementById('adminCountdownDisplay');
+  if(!val){ el.textContent = ''; return; }
+  const days = Math.ceil((new Date(val) - new Date()) / 86400000);
+  let color = '#06A77D', text = days+' days remaining';
+  if(days < 0){ color = '#E63946'; text = 'Expired '+Math.abs(days)+' days ago'; }
+  else if(days <= 7){ color = '#E63946'; }
+  else if(days <= 30){ color = '#FF9F1C'; }
+  el.style.color = color;
+  el.textContent = '⏳ '+text;
 };
 window.saveLicense = async function(){
   const active = document.getElementById('adminLicenseStatus').value === 'active';
@@ -629,6 +643,7 @@ window.recordPaymentReceived = async function(){
   const lastPayment = today.toISOString().slice(0,10);
   document.getElementById('adminExpiryDate').value = expiryDate;
   document.getElementById('adminLastPayment').value = lastPayment;
+  updateCountdownDisplay();
   await update(ref(db, ROOT+'/license'), {active:true, expiryDate, lastPayment});
   showToast('Payment recorded — extended to '+expiryDate);
 };
