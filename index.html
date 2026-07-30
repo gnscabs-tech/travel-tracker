@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Travel Tracker</title>
-<meta name="app-build" content="20260730-1900">
+<meta name="app-build" content="20260730-2010">
 <meta name="theme-color" content="#1E3A8A">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -181,6 +181,10 @@ main{padding:16px;}
 #pinKeypad button{width:68px;height:68px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);color:#fff;font-size:20px;font-weight:700;font-family:'Inter';}
 #pinKeypad button.pin-action{background:none;border:none;font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);}
 #pinKeypad button:active{background:rgba(255,255,255,0.2);}
+@keyframes flashScrollRTL{
+  0%{ transform:translateX(0); }
+  100%{ transform:translateX(-100%); }
+}
 </style>
 
 <div id="app">
@@ -213,6 +217,9 @@ main{padding:16px;}
       <div id="announcementBanner" class="hidden" style="border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:13px;font-weight:600;background:#FEF3C7;color:#92400E;border:1px solid #FCD34D;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
         <div id="announcementText" style="flex:1;"></div>
         <button onclick="dismissAnnouncement()" style="background:none;border:none;color:#92400E;font-weight:800;font-size:16px;line-height:1;padding:0;">✕</button>
+      </div>
+      <div id="flashMessageBanner" style="display:none;overflow:hidden;white-space:nowrap;background:#1A1400;border-radius:10px;padding:9px 0;margin-bottom:14px;">
+        <div id="flashMessageText" style="display:inline-block;padding-left:100%;color:#FFC800;font-weight:700;font-size:13px;"></div>
       </div>
       <div class="stat-grid">
         <div class="stat-box income"><div class="val" id="homeIncome">₹0</div><div class="lbl" data-i18n="lblIncome">This Month Income</div></div>
@@ -583,6 +590,18 @@ async function init(){
     } else {
       el.classList.add('hidden');
     }
+  });
+  onValue(ref(db, ROOT+'/flashMessage'), snap=>{
+    const data = snap.val();
+    const banner = document.getElementById('flashMessageBanner');
+    const textEl = document.getElementById('flashMessageText');
+    if(!data || !data.enabled || !data.text){ banner.style.display = 'none'; return; }
+    textEl.textContent = data.text;
+    const speedSec = data.speedSec || 22;
+    const color = data.color || '#FFC800';
+    textEl.style.color = color;
+    textEl.style.animation = `flashScrollRTL ${speedSec}s linear infinite`;
+    banner.style.display = 'block';
   });
   onValue(ref(db, ROOT+'/vehicles'), snap=>{ vehicles = snap.val()||{}; renderVehicles(); renderEntryDropdowns(); renderEntriesFilter(); });
   onValue(ref(db, ROOT+'/drivers'), snap=>{ drivers = snap.val()||{}; renderDrivers(); renderEntryDropdowns(); });
