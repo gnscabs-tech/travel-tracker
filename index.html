@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Travel Tracker</title>
-<meta name="app-build" content="20260730-1720">
+<meta name="app-build" content="20260730-1900">
 <meta name="theme-color" content="#1E3A8A">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -210,6 +210,10 @@ main{padding:16px;}
     <!-- HOME TAB -->
     <div id="tab-home" class="tab-panel">
       <div id="subscriptionBanner" class="hidden" style="border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:13px;font-weight:700;"></div>
+      <div id="announcementBanner" class="hidden" style="border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:13px;font-weight:600;background:#FEF3C7;color:#92400E;border:1px solid #FCD34D;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+        <div id="announcementText" style="flex:1;"></div>
+        <button onclick="dismissAnnouncement()" style="background:none;border:none;color:#92400E;font-weight:800;font-size:16px;line-height:1;padding:0;">✕</button>
+      </div>
       <div class="stat-grid">
         <div class="stat-box income"><div class="val" id="homeIncome">₹0</div><div class="lbl" data-i18n="lblIncome">This Month Income</div></div>
         <div class="stat-box expense"><div class="val" id="homeExpense">₹0</div><div class="lbl" data-i18n="lblExpense">This Month Expense</div></div>
@@ -477,6 +481,15 @@ let currentReportPeriod = 'daily';
 
 function todayStr(){ return new Date().toISOString().slice(0,10); }
 
+window.dismissAnnouncement = function(){
+  const el = document.getElementById('announcementBanner');
+  el.classList.add('hidden');
+  onValue(ref(db, ROOT+'/announcement'), snap=>{
+    const ann = snap.val();
+    if(ann && ann.ts) localStorage.setItem('tt_announcement_dismissed', String(ann.ts));
+  }, {onlyOnce:true});
+};
+
 /* ---------- Auto Check: background error logging + 3-day digest popup ---------- */
 function logAppError(type, message, extra){
   try{
@@ -559,6 +572,18 @@ async function checkAutoErrorPopup(){
 
 async function init(){
   await authReadyPromise;
+  onValue(ref(db, ROOT+'/announcement'), snap=>{
+    const ann = snap.val();
+    const el = document.getElementById('announcementBanner');
+    if(ann && ann.active && ann.message){
+      const dismissedTs = localStorage.getItem('tt_announcement_dismissed');
+      if(dismissedTs === String(ann.ts)){ el.classList.add('hidden'); return; }
+      document.getElementById('announcementText').textContent = '📢 '+ann.message;
+      el.classList.remove('hidden');
+    } else {
+      el.classList.add('hidden');
+    }
+  });
   onValue(ref(db, ROOT+'/vehicles'), snap=>{ vehicles = snap.val()||{}; renderVehicles(); renderEntryDropdowns(); renderEntriesFilter(); });
   onValue(ref(db, ROOT+'/drivers'), snap=>{ drivers = snap.val()||{}; renderDrivers(); renderEntryDropdowns(); });
   onValue(ref(db, ROOT+'/entries'), snap=>{
